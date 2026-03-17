@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import ProductCard from '../components/ProductCard';
+import allProducts from '../data/products';
 import './Shop.css';
 
 const CATEGORIES = [
@@ -33,19 +33,26 @@ export default function Shop() {
 
     const [localSearch, setLocalSearch] = useState(searchQuery);
 
-    const fetchProducts = useCallback(async () => {
+    const fetchProducts = useCallback(() => {
         setLoading(true);
         try {
-            const params = new URLSearchParams();
-            if (activeCategory !== 'all') params.set('category', activeCategory);
-            if (searchQuery) params.set('search', searchQuery);
-            if (sort) params.set('sort', sort);
+            let filtered = [...allProducts];
+            if (activeCategory !== 'all') filtered = filtered.filter(p => p.category === activeCategory);
+            if (searchQuery) {
+                const q = searchQuery.toLowerCase();
+                filtered = filtered.filter(p =>
+                    p.name.toLowerCase().includes(q) ||
+                    p.anime.toLowerCase().includes(q) ||
+                    (p.tags || []).some(t => t.includes(q))
+                );
+            }
+            if (sort === 'rating') filtered.sort((a, b) => b.rating - a.rating);
+            else if (sort === 'price-asc') filtered.sort((a, b) => a.price - b.price);
+            else if (sort === 'price-desc') filtered.sort((a, b) => b.price - a.price);
+            else filtered.sort((a, b) => b.reviews - a.reviews); // popular
 
-            const res = await axios.get(`/api/products?${params}`);
-            setProducts(res.data.products);
-            setCount(res.data.count);
-        } catch (err) {
-            console.error(err);
+            setProducts(filtered);
+            setCount(filtered.length);
         } finally {
             setLoading(false);
         }
@@ -53,6 +60,7 @@ export default function Shop() {
 
     useEffect(() => { fetchProducts(); }, [fetchProducts]);
     useEffect(() => { setLocalSearch(searchQuery); }, [searchQuery]);
+
 
     const handleSearch = (e) => {
         e.preventDefault();

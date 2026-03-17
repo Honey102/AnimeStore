@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { ToastContext } from '../App';
 import ProductCard from '../components/ProductCard';
+import allProducts from '../data/products';
 import './ProductDetail.css';
 
 function formatPrice(p) { return `₹${p.toLocaleString('en-IN')}`; }
@@ -40,13 +40,12 @@ export default function ProductDetail() {
         setQty(1);
         setActiveTab('Description');
         setActiveThumb(0);
-        axios.get(`/api/products/${id}`)
-            .then(r => {
-                setProduct(r.data.product);
-                setRelated(r.data.related);
-            })
-            .catch(() => navigate('/shop'))
-            .finally(() => setLoading(false));
+        const found = allProducts.find(p => p.id === parseInt(id));
+        if (!found) { navigate('/shop'); return; }
+        setProduct(found);
+        const rel = allProducts.filter(p => p.category === found.category && p.id !== found.id).slice(0, 4);
+        setRelated(rel);
+        setLoading(false);
     }, [id, navigate]);
 
     if (loading) return (

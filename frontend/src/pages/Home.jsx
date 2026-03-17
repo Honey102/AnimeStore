@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import ProductCard from '../components/ProductCard';
+import allProducts from '../data/products';
 import './Home.css';
 
 
@@ -27,10 +27,10 @@ export default function Home() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios.get('/api/products/featured')
-            .then(r => setFeatured(r.data.products))
-            .catch(() => setFeatured([]))
-            .finally(() => setLoading(false));
+        // Show top 8 products by reviews (most popular)
+        const top = [...allProducts].sort((a, b) => b.reviews - a.reviews).slice(0, 8);
+        setFeatured(top);
+        setLoading(false);
     }, []);
 
 
