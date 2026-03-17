@@ -1,0 +1,93 @@
+.notfound-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-base);
+    text-align: center;
+    padding: 2rem;
+}
+
+.notfound-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.notfound-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.18;
+}
+
+.notfound-orb--1 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, #e63946, transparent 70%);
+    top: -150px;
+    left: -150px;
+}
+
+.notfound-orb--2 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, #7c3aed, transparent 70%);
+    bottom: -100px;
+    right: -100px;
+}
+
+.notfound-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.notfound-code {
+    font-size: clamp(5rem, 20vw, 10rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, #e63946, #f4a217);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    letter-spacing: -4px;
+}
+
+.notfound-emoji {
+    font-size: 3.5rem;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+}
+
+.notfound-title {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.notfound-sub {
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1.7;
+    max-width: 400px;
+    margin: 0;
+}
+
+.notfound-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 1rem;
+}

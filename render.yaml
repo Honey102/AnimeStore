@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: animestore-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true          # Render will auto-generate a secure value
+      - key: FRONTEND_URL
+        value: https://your-animestore.vercel.app   # ← CHANGE THIS after Vercel deploy
+    healthCheckPath: /api/health
