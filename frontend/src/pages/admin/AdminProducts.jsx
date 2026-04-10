@@ -25,6 +25,8 @@ export default function AdminProducts() {
     const [saving, setSaving] = useState(false);
     const [deleteConfirm, setDeleteConfirm] = useState(null);
     const [stockModal, setStockModal] = useState(null); // { product, newStock }
+    const [imageUploading, setImageUploading] = useState(false);
+    const [imagePreview, setImagePreview] = useState('');
 
     const load = () => {
         setLoading(true);
@@ -45,7 +47,7 @@ export default function AdminProducts() {
     });
 
     // ── Open add/edit modal ──
-    const openAdd = () => { setEditingProduct(null); setForm(EMPTY_FORM); setModalOpen(true); };
+    const openAdd = () => { setEditingProduct(null); setForm(EMPTY_FORM); setImagePreview(''); setModalOpen(true); };
     const openEdit = (p) => {
         setEditingProduct(p);
         setForm({
@@ -55,7 +57,30 @@ export default function AdminProducts() {
             tags: (p.tags || []).join(', '), image: p.image || '',
             rating: p.rating, reviews: p.reviews,
         });
+        setImagePreview(p.image || '');
         setModalOpen(true);
+    };
+
+    // ── Image File Upload ──
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setImageUploading(true);
+        const formData = new FormData();
+        formData.append('image', file);
+        try {
+            const res = await adminAPI.post('/api/admin/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            const url = res.data.imageUrl;
+            setForm(f => ({ ...f, image: url }));
+            setImagePreview(url);
+            addToast('Image uploaded! ✅', 'success');
+        } catch {
+            addToast('Image upload failed. Try again.', 'error');
+        } finally {
+            setImageUploading(false);
+        }
     };
 
     // ── Save product ──
@@ -277,8 +302,43 @@ export default function AdminProducts() {
                                         <input value={form.tags} onChange={fc('tags')} placeholder="naruto, action-figure, bandai" />
                                     </div>
                                     <div className="admin-field admin-form-col-span">
-                                        <label>Image URL</label>
-                                        <input value={form.image} onChange={fc('image')} placeholder="https://..." />
+                                        <label>Product Image</label>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                                            {/* Upload button */}
+                                            <label style={{
+                                                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                                                padding: '0.5rem 1rem', background: 'var(--bg-hover)',
+                                                border: '1px dashed var(--border-subtle)', borderRadius: '8px',
+                                                cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-secondary)',
+                                                width: 'fit-content'
+                                            }}>
+                                                {imageUploading ? '⏳ Uploading...' : '📁 Upload Image File'}
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    style={{ display: 'none' }}
+                                                    onChange={handleImageUpload}
+                                                    disabled={imageUploading}
+                                                />
+                                            </label>
+                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>— or paste image URL below —</span>
+                                            <input
+                                                value={form.image}
+                                                onChange={e => { fc('image')(e); setImagePreview(e.target.value); }}
+                                                placeholder="https://..."
+                                            />
+                                            {/* Preview */}
+                                            {imagePreview && (
+                                                <div style={{ marginTop: '0.5rem' }}>
+                                                    <img
+                                                        src={imagePreview}
+                                                        alt="Preview"
+                                                        style={{ maxHeight: '120px', maxWidth: '200px', borderRadius: '8px', objectFit: 'cover', border: '1px solid var(--border-subtle)' }}
+                                                        onError={e => e.target.style.display = 'none'}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

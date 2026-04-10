@@ -4,7 +4,30 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
 const { adminMiddleware, ADMIN_SECRET } = require('../middleware/adminAuth');
+
+// ── Image Upload Setup ───────────────────────────────────────────────────────
+const UPLOADS_DIR = path.join(__dirname, '../uploads');
+if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, UPLOADS_DIR),
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname).toLowerCase();
+        cb(null, `product_${Date.now()}${ext}`);
+    }
+});
+const upload = multer({
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+    fileFilter: (req, file, cb) => {
+        const allowed = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (allowed.includes(ext)) cb(null, true);
+        else cb(new Error('Only image files are allowed (jpg, png, webp, gif)'));
+    }
+});
 
 // ── File Paths ──────────────────────────────────────────────────────────────
 const PRODUCTS_FILE = path.join(__dirname, '../data/products.json');
@@ -48,6 +71,15 @@ function getAllOrders() {
         ...userOrders
     ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  POST /api/admin/upload  (image upload)                                  ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+router.post('/upload', adminMiddleware, upload.single('image'), (req, res) => {
+    if (!req.file) return res.status(400).json({ success: false, message: 'No image file provided' });
+    const imageUrl = `/uploads/${req.file.filename}`;
+    res.json({ success: true, imageUrl, message: '✅ Image uploaded successfully!' });
+});
 
 // ╔══════════════════════════════════════════════════════════════════════════╗
 // ║  POST /api/admin/login                                                   ║

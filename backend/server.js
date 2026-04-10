@@ -31,6 +31,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+app.use('/uploads', express.static(require('path').join(__dirname, 'uploads')));
 
 // Routes
 app.use('/api/products', productsRouter);
