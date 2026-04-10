@@ -111,7 +111,7 @@ export default function ProductDetail() {
         addToast('Compare feature coming soon! 🔜', 'info');
     };
 
-    const thumbVariants = [cat.emoji, '📸', '🔎', '🎁'];
+    const thumbVariants = ['📸', '🔎', '🎁'];
 
     return (
         <div className="product-detail">
@@ -146,9 +146,26 @@ export default function ProductDetail() {
                                 <div className="pd-ring pd-ring-1" style={{ borderColor: cat.bg + '33' }} />
                                 <div className="pd-ring pd-ring-2" style={{ borderColor: cat.bg + '22' }} />
                             </div>
-                            <span className="pd-main-emoji" style={{ filter: `drop-shadow(0 0 30px ${cat.glow})` }}>
-                                {thumbVariants[activeThumb]}
-                            </span>
+                            {/* Show real image if product has one, else show emoji */}
+                            {product.image && activeThumb === 0 ? (
+                                <img
+                                    src={product.image}
+                                    alt={product.name}
+                                    style={{
+                                        position: 'absolute', inset: 0,
+                                        width: '100%', height: '100%',
+                                        objectFit: 'contain', borderRadius: 'inherit',
+                                        padding: '1rem',
+                                        transition: 'transform 0.3s ease',
+                                        transform: zoomed ? 'scale(1.08)' : 'scale(1)'
+                                    }}
+                                    onError={e => e.target.style.display = 'none'}
+                                />
+                            ) : (
+                                <span className="pd-main-emoji" style={{ filter: `drop-shadow(0 0 30px ${cat.glow})` }}>
+                                    {activeThumb === 0 ? cat.emoji : thumbVariants[activeThumb - (product.image ? 0 : -1)]}
+                                </span>
+                            )}
                             {product.badge && (
                                 <span className={`pd-badge badge badge-${product.badge.toLowerCase()}`}>
                                     {product.badge}
@@ -159,12 +176,23 @@ export default function ProductDetail() {
 
                         {/* Thumbnails */}
                         <div className="pd-thumbs">
+                            {/* First thumb: real photo or category emoji */}
+                            <button
+                                className={`pd-thumb ${activeThumb === 0 ? 'active' : ''}`}
+                                onClick={() => setActiveThumb(0)}
+                                style={activeThumb === 0 ? { borderColor: cat.bg, boxShadow: `0 0 12px ${cat.glow}` } : {}}
+                            >
+                                {product.image
+                                    ? <img src={product.image} alt="thumb" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '6px' }} onError={e => e.target.style.display='none'} />
+                                    : <span>{cat.emoji}</span>
+                                }
+                            </button>
                             {thumbVariants.map((icon, i) => (
                                 <button
                                     key={i}
-                                    className={`pd-thumb ${activeThumb === i ? 'active' : ''}`}
-                                    onClick={() => setActiveThumb(i)}
-                                    style={activeThumb === i ? { borderColor: cat.bg, boxShadow: `0 0 12px ${cat.glow}` } : {}}
+                                    className={`pd-thumb ${activeThumb === i + 1 ? 'active' : ''}`}
+                                    onClick={() => setActiveThumb(i + 1)}
+                                    style={activeThumb === i + 1 ? { borderColor: cat.bg, boxShadow: `0 0 12px ${cat.glow}` } : {}}
                                 >
                                     <span>{icon}</span>
                                 </button>
