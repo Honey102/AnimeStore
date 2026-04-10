@@ -43,6 +43,17 @@
     opacity: 0.85;
     transition: transform 0.4s ease;
     filter: drop-shadow(0 0 20px rgba(230, 57, 70, 0.3));
+    position: relative;
+    z-index: 0;
+}
+
+.product-card__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
 }
 
 .product-card:hover .product-card__emoji {

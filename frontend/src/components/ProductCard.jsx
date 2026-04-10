@@ -65,11 +65,11 @@ export default function ProductCard({ product }) {
                     <img
                         src={product.image}
                         alt={product.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }}
-                        onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                        className="product-card__img"
+                        onError={e => { e.target.style.display = 'none'; }}
                     />
                 ) : null}
-                <div className="product-card__emoji" style={product.image ? { display: 'none' } : {}}>{emojiMap[product.category] || '🎌'}</div>
+                <div className="product-card__emoji">{emojiMap[product.category] || '🎌'}</div>
                 <div className="product-card__anime-badge">{product.anime}</div>
 
                 {product.badge && (
