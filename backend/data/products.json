@@ -643,5 +643,53 @@
     "badge": "",
     "description": "",
     "tags": []
+  },
+  {
+    "id": 34,
+    "name": "teat 4",
+    "category": "action-figures",
+    "anime": "teat 4",
+    "price": 300,
+    "originalPrice": 900,
+    "rating": 4.5,
+    "reviews": 0,
+    "stock": 6,
+    "image": "",
+    "badge": "New",
+    "description": "",
+    "tags": []
+  },
+  {
+    "id": 35,
+    "name": "Test Anime Figure",
+    "category": "action-figures",
+    "anime": "Naruto",
+    "price": 999,
+    "originalPrice": 1299,
+    "rating": 4.5,
+    "reviews": 10,
+    "stock": 50,
+    "image": "",
+    "badge": "Hot",
+    "description": "Test product",
+    "tags": [
+      "naruto",
+      "test"
+    ]
+  },
+  {
+    "id": 36,
+    "name": "test 5 ",
+    "category": "action-figures",
+    "anime": "tesh5 ",
+    "price": 399,
+    "originalPrice": 599,
+    "rating": 4.5,
+    "reviews": 9,
+    "stock": 50,
+    "image": "",
+    "badge": "New",
+    "description": "",
+    "tags": []
   }
 ]

@@ -262,7 +262,7 @@ export default function AdminProducts() {
                                     </div>
                                     <div className="admin-field">
                                         <label>Rating (0–5)</label>
-                                        <input type="number" min="0" max="5" step="0.1" value={form.rating} onChange={fc('rating')} />
+                                        <input type="number" min="0" max="5" step="any" value={form.rating} onChange={fc('rating')} />
                                     </div>
                                     <div className="admin-field">
                                         <label>Reviews Count</label>

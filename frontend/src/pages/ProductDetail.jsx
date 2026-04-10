@@ -4,7 +4,6 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { ToastContext } from '../App';
 import ProductCard from '../components/ProductCard';
-import allProducts from '../data/products';
 import './ProductDetail.css';
 
 function formatPrice(p) { return `₹${p.toLocaleString('en-IN')}`; }
@@ -40,12 +39,18 @@ export default function ProductDetail() {
         setQty(1);
         setActiveTab('Description');
         setActiveThumb(0);
-        const found = allProducts.find(p => p.id === parseInt(id));
-        if (!found) { navigate('/shop'); return; }
-        setProduct(found);
-        const rel = allProducts.filter(p => p.category === found.category && p.id !== found.id).slice(0, 4);
-        setRelated(rel);
-        setLoading(false);
+        fetch('/api/products')
+            .then(r => r.json())
+            .then(data => {
+                const all = data.products || [];
+                const found = all.find(p => p.id === parseInt(id));
+                if (!found) { navigate('/shop'); return; }
+                setProduct(found);
+                const rel = all.filter(p => p.category === found.category && p.id !== found.id).slice(0, 4);
+                setRelated(rel);
+            })
+            .catch(() => navigate('/shop'))
+            .finally(() => setLoading(false));
     }, [id, navigate]);
 
     if (loading) return (

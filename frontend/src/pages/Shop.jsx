@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
-import allProducts from '../data/products';
 import './Shop.css';
 
 const CATEGORIES = [
@@ -35,27 +34,32 @@ export default function Shop() {
 
     const fetchProducts = useCallback(() => {
         setLoading(true);
-        try {
-            let filtered = [...allProducts];
-            if (activeCategory !== 'all') filtered = filtered.filter(p => p.category === activeCategory);
-            if (searchQuery) {
-                const q = searchQuery.toLowerCase();
-                filtered = filtered.filter(p =>
-                    p.name.toLowerCase().includes(q) ||
-                    p.anime.toLowerCase().includes(q) ||
-                    (p.tags || []).some(t => t.includes(q))
-                );
-            }
-            if (sort === 'rating') filtered.sort((a, b) => b.rating - a.rating);
-            else if (sort === 'price-asc') filtered.sort((a, b) => a.price - b.price);
-            else if (sort === 'price-desc') filtered.sort((a, b) => b.price - a.price);
-            else filtered.sort((a, b) => b.reviews - a.reviews); // popular
+        fetch('/api/products')
+            .then(r => r.json())
+            .then(data => {
+                let filtered = [...(data.products || [])];
+                if (activeCategory !== 'all') filtered = filtered.filter(p => p.category === activeCategory);
+                if (searchQuery) {
+                    const q = searchQuery.toLowerCase();
+                    filtered = filtered.filter(p =>
+                        p.name.toLowerCase().includes(q) ||
+                        p.anime.toLowerCase().includes(q) ||
+                        (p.tags || []).some(t => t.includes(q))
+                    );
+                }
+                if (sort === 'rating') filtered.sort((a, b) => b.rating - a.rating);
+                else if (sort === 'price-asc') filtered.sort((a, b) => a.price - b.price);
+                else if (sort === 'price-desc') filtered.sort((a, b) => b.price - a.price);
+                else filtered.sort((a, b) => b.reviews - a.reviews);
 
-            setProducts(filtered);
-            setCount(filtered.length);
-        } finally {
-            setLoading(false);
-        }
+                setProducts(filtered);
+                setCount(filtered.length);
+            })
+            .catch(() => {
+                setProducts([]);
+                setCount(0);
+            })
+            .finally(() => setLoading(false));
     }, [activeCategory, searchQuery, sort]);
 
     useEffect(() => { fetchProducts(); }, [fetchProducts]);

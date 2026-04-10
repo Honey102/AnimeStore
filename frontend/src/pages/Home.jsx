@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
-import allProducts from '../data/products';
 import './Home.css';
 
 const marqueeItems = [
@@ -53,10 +52,14 @@ export default function Home() {
 
 
     useEffect(() => {
-        // Show top 8 products by reviews (most popular)
-        const top = [...allProducts].sort((a, b) => b.reviews - a.reviews).slice(0, 8);
-        setFeatured(top);
-        setLoading(false);
+        fetch('/api/products')
+            .then(r => r.json())
+            .then(data => {
+                const top = [...(data.products || [])].sort((a, b) => b.reviews - a.reviews).slice(0, 8);
+                setFeatured(top);
+            })
+            .catch(() => setFeatured([]))
+            .finally(() => setLoading(false));
     }, []);
 
 
