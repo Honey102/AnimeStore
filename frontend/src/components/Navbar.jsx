@@ -30,6 +30,7 @@ export default function Navbar() {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const searchCloseTimer = useRef(null);
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -82,8 +83,15 @@ export default function Navbar() {
                 <div className="navbar__actions">
                     <div
                         className="navbar__search-wrapper"
-                        onMouseEnter={() => setSearchOpen(true)}
-                        onMouseLeave={() => setSearchOpen(false)}
+                        onMouseEnter={() => {
+                            clearTimeout(searchCloseTimer.current);
+                            setSearchOpen(true);
+                        }}
+                        onMouseLeave={() => {
+                            // Debounce: give 200ms before closing so cursor
+                            // can move from icon → input without the bar closing
+                            searchCloseTimer.current = setTimeout(() => setSearchOpen(false), 200);
+                        }}
                     >
                         <button
                             className="navbar__icon-btn"

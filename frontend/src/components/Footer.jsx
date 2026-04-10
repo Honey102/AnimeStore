@@ -1,8 +1,16 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
+import { ToastContext } from '../App';
 import './Footer.css';
 
 export default function Footer() {
+    const { addToast } = useContext(ToastContext);
+
+    const comingSoon = (e) => {
+        e.preventDefault();
+        addToast('This page is coming soon! 🚀', 'info');
+    };
+
     return (
         <footer className="footer">
             <div className="footer__glow" />
@@ -11,8 +19,13 @@ export default function Footer() {
                     <Link to="/" className="footer__logo">⛩️ AnimeStore</Link>
                     <p className="footer__tagline">Your ultimate destination for premium anime merchandise. Straight from the anime world to your doorstep. 🎌</p>
                     <div className="footer__socials">
-                        {['🐦', '📸', '💬', '▶️'].map((icon, i) => (
-                            <a key={i} href="#" className="social-btn" aria-label="Social media">{icon}</a>
+                        {[
+                            { icon: '🐦', label: 'Twitter' },
+                            { icon: '📸', label: 'Instagram' },
+                            { icon: '💬', label: 'Discord' },
+                            { icon: '▶️', label: 'YouTube' },
+                        ].map((s) => (
+                            <a key={s.label} href="#" className="social-btn" aria-label={s.label} onClick={comingSoon}>{s.icon}</a>
                         ))}
                     </div>
                 </div>
@@ -38,10 +51,10 @@ export default function Footer() {
                 <div className="footer__links-group">
                     <h4>Info</h4>
                     <Link to="/about">About Us</Link>
-                    <a href="#">Shipping Policy</a>
-                    <a href="#">Returns & Refunds</a>
-                    <a href="#">Track Order</a>
-                    <a href="#">Contact Us</a>
+                    <a href="#" onClick={comingSoon}>Shipping Policy</a>
+                    <a href="#" onClick={comingSoon}>Returns &amp; Refunds</a>
+                    <a href="#" onClick={comingSoon}>Track Order</a>
+                    <a href="#" onClick={comingSoon}>Contact Us</a>
                 </div>
             </div>
 

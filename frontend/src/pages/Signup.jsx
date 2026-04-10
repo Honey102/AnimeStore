@@ -4,6 +4,21 @@ import { useAuth } from '../context/AuthContext';
 import { ToastContext } from '../App';
 import './Auth.css';
 
+// ── Password strength helpers (declared before component to avoid hoisting issues) ──
+function getStrength(password) {
+    let score = 0;
+    if (password.length >= 6) score++;
+    if (password.length >= 10) score++;
+    if (/[A-Z]/.test(password) && /[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+    return score;
+}
+
+function getStrengthLabel(password) {
+    const s = getStrength(password);
+    return ['weak', 'fair', 'good', 'strong'][s - 1] || 'weak';
+}
+
 export default function Signup() {
     const { register } = useAuth();
     const { addToast } = useContext(ToastContext);
@@ -144,16 +159,4 @@ export default function Signup() {
     );
 }
 
-function getStrength(password) {
-    let score = 0;
-    if (password.length >= 6) score++;
-    if (password.length >= 10) score++;
-    if (/[A-Z]/.test(password) && /[0-9]/.test(password)) score++;
-    if (/[^A-Za-z0-9]/.test(password)) score++;
-    return score;
-}
 
-function getStrengthLabel(password) {
-    const s = getStrength(password);
-    return ['weak', 'fair', 'good', 'strong'][s - 1] || 'weak';
-}

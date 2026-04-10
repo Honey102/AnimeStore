@@ -155,7 +155,12 @@ export default function Shop() {
                             {searchQuery && (
                                 <span className="filter-tag">
                                     🔍 "{searchQuery}"
-                                    <button onClick={() => { setLocalSearch(''); setSearchParams({}); }}>✕</button>
+                                    <button onClick={() => {
+                                        setLocalSearch('');
+                                        const params = new URLSearchParams(searchParams);
+                                        params.delete('search');
+                                        setSearchParams(params);
+                                    }}>✕</button>
                                 </span>
                             )}
                         </div>

@@ -26,6 +26,7 @@ export default function ProductCard({ product }) {
     const handleAddToCart = (e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (product.stock <= 0) return;
         addItem(product);
         addToast(`${product.name} added to cart! 🛒`, 'success');
     };
@@ -37,9 +38,13 @@ export default function ProductCard({ product }) {
             addToast('Please login to use wishlist! 🔑', 'error');
             return;
         }
-        const res = await toggleWishlist(product.id);
-        if (res) {
-            addToast(res.message, res.wishlisted ? 'success' : 'info');
+        try {
+            const res = await toggleWishlist(product.id);
+            if (res) {
+                addToast(res.message, res.wishlisted ? 'success' : 'info');
+            }
+        } catch {
+            addToast('Could not update wishlist. Check your connection.', 'error');
         }
     };
 
@@ -82,8 +87,9 @@ export default function ProductCard({ product }) {
                         className="btn btn-primary btn-sm product-card__add-btn"
                         onClick={handleAddToCart}
                         id={`add-to-cart-${product.id}`}
+                        disabled={product.stock <= 0}
                     >
-                        🛒 Add to Cart
+                        {product.stock <= 0 ? '❌ Out of Stock' : '🛒 Add to Cart'}
                     </button>
                 </div>
             </div>
@@ -104,7 +110,9 @@ export default function ProductCard({ product }) {
                     <span className="price-discount">-{discount}%</span>
                 </div>
 
-                {product.stock <= 5 && (
+                {product.stock <= 0 ? (
+                    <p className="product-card__stock out-of-stock">❌ Out of Stock</p>
+                ) : product.stock <= 5 && (
                     <p className="product-card__stock">⚡ Only {product.stock} left!</p>
                 )}
             </div>

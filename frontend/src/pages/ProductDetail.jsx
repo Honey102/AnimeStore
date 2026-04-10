@@ -61,7 +61,9 @@ export default function ProductDetail() {
     if (!product) return null;
 
     const cat = categoryColors[product.category] || { bg: '#e63946', glow: 'rgba(230,57,70,0.35)', emoji: '🎌' };
-    const discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+    const discount = product.originalPrice && product.originalPrice > product.price
+        ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+        : 0;
     const stars = product.rating;
     const fullStars = Math.floor(stars);
     const hasHalf = stars % 1 >= 0.5;
@@ -201,7 +203,13 @@ export default function ProductDetail() {
                             </div>
                             <span className="pd-rating-num">{product.rating}</span>
                             <span className="pd-rating-sep">•</span>
-                            <span className="pd-reviews-link">{product.reviews.toLocaleString()} reviews</span>
+                            <span
+                                className="pd-reviews-link"
+                                onClick={() => {
+                                    setActiveTab('Reviews');
+                                    document.getElementById('pd-tabs-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }}
+                            >{product.reviews.toLocaleString()} reviews</span>
                         </div>
 
                         {/* Price block */}
@@ -252,19 +260,20 @@ export default function ProductDetail() {
                                 className={`pd-btn-cart ${added ? 'added' : ''}`}
                                 onClick={handleAddToCart}
                                 id="add-to-cart-detail"
-                                disabled={added}
+                                disabled={added || product.stock <= 0}
                             >
-                                <span className="pd-btn-icon">{added ? '✅' : '🛒'}</span>
-                                <span>{added ? 'Added to Cart!' : 'Add to Cart'}</span>
+                                <span className="pd-btn-icon">{product.stock <= 0 ? '❌' : added ? '✅' : '🛒'}</span>
+                                <span>{product.stock <= 0 ? 'Out of Stock' : added ? 'Added to Cart!' : 'Add to Cart'}</span>
                             </button>
                             <button
                                 className="pd-btn-buy"
                                 onClick={handleBuyNow}
                                 id="buy-now-btn"
-                                style={{ background: `linear-gradient(135deg, ${cat.bg}, ${cat.bg}cc)` }}
+                                disabled={product.stock <= 0}
+                                style={{ background: product.stock <= 0 ? 'var(--bg-card)' : `linear-gradient(135deg, ${cat.bg}, ${cat.bg}cc)` }}
                             >
-                                <span className="pd-btn-icon">⚡</span>
-                                <span>Buy Now</span>
+                                <span className="pd-btn-icon">{product.stock <= 0 ? '❌' : '⚡'}</span>
+                                <span>{product.stock <= 0 ? 'Unavailable' : 'Buy Now'}</span>
                             </button>
                         </div>
 
@@ -296,7 +305,7 @@ export default function ProductDetail() {
                 </div>
 
                 {/* ── Tabs Section ── */}
-                <div className="pd-tabs-section">
+                <div className="pd-tabs-section" id="pd-tabs-section">
                     <div className="pd-tabs-nav">
                         {TABS.map(tab => (
                             <button

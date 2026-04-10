@@ -444,113 +444,125 @@
     color: var(--text-muted);
 }
 
-/* Hero visual */
-.hero__visual {
+/* ── Hero Panel ── */
+.hero__panel {
+    position: relative;
+    width: 320px;
+    height: 320px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.hero__float-cards {
-    position: relative;
-    width: 320px;
-    height: 320px;
-}
-
-.hero__center-orb {
+.hero__panel-glow {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 5rem;
-    filter: drop-shadow(0 0 30px rgba(230, 57, 70, 0.4));
-    animation: float 4s ease-in-out infinite;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(230, 57, 70, 0.15) 0%, rgba(124, 58, 237, 0.1) 50%, transparent 70%);
+    animation: pulse 3s ease-in-out infinite;
+    pointer-events: none;
 }
 
-.hero__float-card {
-    position: absolute;
-    width: max-content;
-    min-width: 130px;
-    padding: 0.6rem 0.9rem;
-    background: rgba(16, 16, 24, 0.75);
-    border: 1px solid var(--card-color, rgba(255, 255, 255, 0.1));
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    backdrop-filter: blur(14px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 12px rgba(0, 0, 0, 0.2);
-    text-decoration: none;
-    cursor: pointer;
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s;
-}
-
-.hero__float-card:hover {
-    transform: scale(1.07) translateY(-4px) !important;
-    border-color: var(--card-color, var(--accent-red));
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 20px var(--card-color, rgba(230, 57, 70, 0.3));
-    animation-play-state: paused;
-}
-
-.hero__float-icon {
-    font-size: 1.6rem;
-    line-height: 1;
-    filter: drop-shadow(0 0 8px var(--card-color, rgba(230, 57, 70, 0.5)));
-}
-
-.hero__float-info {
+.hero__panel-center {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(16, 16, 28, 0.6);
+    border: 1px solid rgba(230, 57, 70, 0.25);
+    border-radius: 50%;
+    width: 160px;
+    height: 160px;
+    justify-content: center;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 40px rgba(230, 57, 70, 0.15), inset 0 0 30px rgba(230, 57, 70, 0.05);
+    animation: float 4s ease-in-out infinite;
+    text-decoration: none;
+    cursor: pointer;
+    transition: box-shadow 0.25s, border-color 0.25s;
 }
 
-.hero__float-label {
-    font-size: 0.78rem;
-    font-weight: 700;
+.hero__panel-center:hover {
+    border-color: rgba(230, 57, 70, 0.55);
+    box-shadow: 0 0 60px rgba(230, 57, 70, 0.3), inset 0 0 30px rgba(230, 57, 70, 0.1);
+}
+
+.hero__panel-emoji {
+    font-size: 3.5rem;
+    filter: drop-shadow(0 0 16px rgba(230, 57, 70, 0.5));
+}
+
+.hero__panel-tagline {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.52rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    color: var(--accent-red);
+    opacity: 0.8;
+}
+
+/* ── Floating badges ── */
+.hero__badge {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.8rem;
+    background: rgba(16, 16, 28, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.hero__badge--tl {
+    top: 10px;
+    left: 0;
+    animation: float 3.2s ease-in-out infinite 0s;
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.hero__badge--tr {
+    top: 10px;
+    right: 0;
+    animation: float 3.8s ease-in-out infinite 0.4s;
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.hero__badge--bl {
+    bottom: 10px;
+    left: 0;
+    animation: float 3.5s ease-in-out infinite 0.8s;
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.hero__badge--br {
+    bottom: 10px;
+    right: 0;
+    animation: float 3s ease-in-out infinite 0.2s;
+    border-color: rgba(230, 57, 70, 0.3);
+}
+
+.hero__badge-icon {
+    font-size: 1.35rem;
+}
+
+.hero__badge-val {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 800;
     color: var(--text-primary);
     white-space: nowrap;
 }
 
-.hero__float-sub {
-    font-size: 0.65rem;
-    color: var(--card-color, var(--accent-gold));
+.hero__badge-key {
+    font-size: 0.62rem;
+    color: var(--text-muted);
     font-weight: 600;
     white-space: nowrap;
-    opacity: 0.9;
 }
 
 
-.hero__float-card--1 {
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    animation: float 3s ease-in-out infinite;
-}
-
-.hero__float-card--2 {
-    top: 25%;
-    right: 0;
-    animation: float 3.5s ease-in-out infinite 0.5s;
-}
-
-.hero__float-card--3 {
-    bottom: 25%;
-    right: 5%;
-    animation: float 4s ease-in-out infinite 1s;
-}
-
-.hero__float-card--4 {
-    bottom: 25%;
-    left: 5%;
-    animation: float 3.8s ease-in-out infinite 0.3s;
-}
-
-.hero__float-card--5 {
-    top: 25%;
-    left: 0;
-    animation: float 3.2s ease-in-out infinite 0.8s;
-}
-
-/* Scroll indicator */
 .hero__scroll {
     display: flex;
     flex-direction: column;
@@ -572,18 +584,28 @@
 
 /* Marquee */
 .marquee-wrapper {
-    overflow: hidden;
     display: flex;
     flex-direction: column;
     gap: 0;
     border-top: 1px solid var(--border-subtle);
     border-bottom: 1px solid var(--border-subtle);
+    overflow: hidden;
 }
 
 .marquee-strip {
-    overflow: hidden;
+    overflow-x: scroll;
+    overflow-y: hidden;
     padding: 0.55rem 0;
     background: var(--bg-secondary);
+    cursor: grab;
+    user-select: none;
+    /* Hide scrollbar */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.marquee-strip::-webkit-scrollbar {
+    display: none;
 }
 
 .marquee-strip--reverse {
@@ -605,7 +627,7 @@
     animation: marqueeRight 25s linear infinite;
 }
 
-/* Pause on hover */
+/* Pause on hover — animation pauses, drag-scroll takes over */
 .marquee-strip:hover .marquee-left,
 .marquee-strip:hover .marquee-right {
     animation-play-state: paused;
@@ -843,15 +865,17 @@
     }
 }
 
-@media (max-width: 768px) {
-    .hero__content {
-        grid-template-columns: 1fr;
-    }
-
+@media (max-width: 900px) {
     .hero__visual {
         display: none;
     }
 
+    .hero__content {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
     .categories-grid,
     .anime-grid {
         grid-template-columns: repeat(2, 1fr);

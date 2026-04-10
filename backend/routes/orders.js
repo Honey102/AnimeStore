@@ -19,16 +19,27 @@ function writeOrders(orders) {
 
 // POST /api/orders — place an order (guest or logged-in)
 router.post('/', (req, res) => {
-    const { items, customer, total } = req.body;
+    const { items, customer } = req.body;
     if (!items || !items.length) {
         return res.status(400).json({ success: false, message: 'No items in order' });
     }
+
+    // ── Server-side total recalculation (security: ignore client-sent total) ──
+    const shipping = (() => {
+        const sub = items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+        return sub > 999 ? 0 : 99;
+    })();
+    const serverTotal = items.reduce((sum, i) => {
+        if (!i.price || !i.quantity || i.quantity < 1) return sum;
+        return sum + (i.price * i.quantity);
+    }, 0) + shipping;
+
     const orders = readOrders();
     const order = {
         id: `ORD-${Date.now()}`,
         items,
         customer: customer || { name: 'Guest' },
-        total,
+        total: serverTotal,
         status: 'confirmed',
         createdAt: new Date().toISOString()
     };

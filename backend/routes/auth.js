@@ -5,8 +5,19 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
 
+const PRODUCTS_FILE = path.join(__dirname, '../data/products.json');
+function readProducts() {
+    try {
+        if (!fs.existsSync(PRODUCTS_FILE)) return [];
+        return JSON.parse(fs.readFileSync(PRODUCTS_FILE, 'utf8'));
+    } catch { return []; }
+}
+
 const USERS_FILE = path.join(__dirname, '../data/users.json');
 const JWT_SECRET = process.env.JWT_SECRET || 'animestore_secret_2026_$';
+if (!process.env.JWT_SECRET) {
+    console.warn('⚠️  WARNING: JWT_SECRET env variable not set! Using hardcoded fallback — set it in production for security.');
+}
 
 // Helper: read/write users
 function readUsers() {
@@ -135,8 +146,7 @@ router.get('/wishlist', authMiddleware, (req, res) => {
     const user = users.find(u => u.id === req.user.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-    const products = require('../data/products');
-    const wishlistProducts = products.filter(p => (user.wishlist || []).includes(p.id));
+    const wishlistProducts = readProducts().filter(p => (user.wishlist || []).includes(p.id));
     res.json({ success: true, products: wishlistProducts, ids: user.wishlist || [] });
 });
 

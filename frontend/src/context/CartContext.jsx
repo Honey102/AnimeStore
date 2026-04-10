@@ -6,7 +6,10 @@ const cartReducer = (state, action) => {
     switch (action.type) {
         case 'ADD_ITEM': {
             const existing = state.items.find(i => i.id === action.payload.id);
+            const maxStock = action.payload.stock ?? Infinity;
             if (existing) {
+                // Don't exceed product stock
+                if (existing.quantity >= maxStock) return state;
                 return {
                     ...state,
                     items: state.items.map(i =>

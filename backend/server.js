@@ -4,6 +4,7 @@ const cors = require('cors');
 const productsRouter = require('./routes/products');
 const ordersRouter = require('./routes/orders');
 const { router: authRouter } = require('./routes/auth');
+const adminRouter = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -35,6 +36,7 @@ app.use(express.json());
 app.use('/api/products', productsRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/admin', adminRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -44,5 +46,9 @@ app.get('/api/health', (req, res) => {
 app.listen(PORT, () => {
   console.log(`\n🎌 AnimeStore Backend running on http://localhost:${PORT}`);
   console.log(`📦 Products API: http://localhost:${PORT}/api/products`);
+  console.log(`🔐 Admin API:    http://localhost:${PORT}/api/admin`);
   console.log(`✅ Health Check: http://localhost:${PORT}/api/health\n`);
+  if (!process.env.ADMIN_PASSWORD) {
+    console.warn('⚠️  ADMIN_PASSWORD not set in .env — using default: admin@animestore123');
+  }
 });

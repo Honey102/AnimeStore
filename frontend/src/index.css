@@ -275,6 +275,11 @@ ul { list-style: none; }
   animation: slideIn 0.3s ease;
   min-width: 280px;
 }
+/* Toast type variants */
+.toast--success { border-left-color: #4ade80; }
+.toast--error   { border-left-color: var(--accent-red); }
+.toast--info    { border-left-color: #60a5fa; }
+.toast--warning { border-left-color: var(--accent-gold); }
 @keyframes slideIn {
   from { transform: translateX(100%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }

@@ -1,0 +1,25 @@
+{
+    "flashSale": {
+        "active": true,
+        "title": "Today's Hot Deals",
+        "endTime": null,
+        "productIds": [1, 3, 16, 27]
+    },
+    "siteSettings": {
+        "freeShippingThreshold": 999,
+        "shippingCost": 99,
+        "codAvailable": true,
+        "maintenanceMode": false
+    },
+    "announcements": {
+        "active": false,
+        "text": "Free shipping on orders above ₹999! Limited time offer 🎌"
+    },
+    "categories": [
+        { "id": "action-figures", "label": "Action Figures", "icon": "🗡️" },
+        { "id": "keychains",      "label": "Keychains",      "icon": "🔑" },
+        { "id": "posters",        "label": "Posters",        "icon": "🖼️" },
+        { "id": "clothing",       "label": "Clothing",       "icon": "👕" },
+        { "id": "accessories",    "label": "Accessories",    "icon": "✨" }
+    ]
+}

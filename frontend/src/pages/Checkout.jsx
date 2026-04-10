@@ -29,6 +29,20 @@ export default function Checkout() {
 
     const handleChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 
+    // Auto-format card number as groups of 4: 1234 5678 9012 3456
+    const handleCardNumber = (e) => {
+        const raw = e.target.value.replace(/\D/g, '').slice(0, 16);
+        const formatted = raw.match(/.{1,4}/g)?.join(' ') || raw;
+        setForm(f => ({ ...f, cardNumber: formatted }));
+    };
+
+    // Auto-insert slash for expiry: MM/YY
+    const handleCardExpiry = (e) => {
+        let val = e.target.value.replace(/\D/g, '').slice(0, 4);
+        if (val.length >= 3) val = val.slice(0, 2) + '/' + val.slice(2);
+        setForm(f => ({ ...f, cardExpiry: val }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!items.length) return;
@@ -47,7 +61,25 @@ export default function Checkout() {
             clearCart();
             addToast('Order placed successfully! 🎌', 'success');
         } catch {
-            addToast('Something went wrong. Try again!', 'error');
+            // Offline fallback: save order locally so data isn't lost
+            const fallbackOrder = {
+                id: `ORD-${Date.now()}`,
+                items,
+                total,
+                customer: form,
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            };
+            try {
+                const existing = JSON.parse(localStorage.getItem('animestore_offline_orders') || '[]');
+                localStorage.setItem('animestore_offline_orders', JSON.stringify([fallbackOrder, ...existing]));
+                setOrderId(fallbackOrder.id);
+                setSuccess(true);
+                clearCart();
+                addToast('Order saved locally! (Server offline) 📦', 'info');
+            } catch {
+                addToast('Something went wrong. Please try again!', 'error');
+            }
         } finally {
             setPlacing(false);
         }
@@ -63,6 +95,7 @@ export default function Checkout() {
                     <p>Your anime goodies are on their way! 🚀<br />You'll receive a confirmation shortly.</p>
                     <div className="success-actions">
                         <Link to="/shop" className="btn btn-primary btn-lg">Continue Shopping</Link>
+                        <Link to="/profile" state={{ tab: 'orders' }} className="btn btn-secondary">📦 View My Orders</Link>
                         <Link to="/" className="btn btn-secondary">Go to Home</Link>
                     </div>
                 </div>
@@ -164,9 +197,10 @@ export default function Checkout() {
                                         <input
                                             id="cardNumber" name="cardNumber" type="text" required
                                             placeholder="1234 5678 9012 3456"
-                                            value={form.cardNumber} onChange={handleChange}
+                                            value={form.cardNumber}
+                                            onChange={handleCardNumber}
                                             maxLength="19"
-                                            pattern="[0-9 ]{16,19}"
+                                            inputMode="numeric"
                                             title="Enter a valid 16-digit card number"
                                         />
                                     </div>
@@ -176,9 +210,10 @@ export default function Checkout() {
                                             <input
                                                 id="cardExpiry" name="cardExpiry" type="text" required
                                                 placeholder="MM/YY"
-                                                value={form.cardExpiry} onChange={handleChange}
+                                                value={form.cardExpiry}
+                                                onChange={handleCardExpiry}
                                                 maxLength="5"
-                                                pattern="(0[1-9]|1[0-2])\/[0-9]{2}"
+                                                inputMode="numeric"
                                                 title="Enter expiry in MM/YY format"
                                             />
                                         </div>

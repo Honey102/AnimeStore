@@ -4,7 +4,18 @@ import ProductCard from '../components/ProductCard';
 import allProducts from '../data/products';
 import './Home.css';
 
-
+const marqueeItems = [
+    { icon: '🍥', name: 'Naruto', rgb: '249,115,22' },
+    { icon: '☠️', name: 'One Piece', rgb: '59,130,246' },
+    { icon: '⚔️', name: 'Demon Slayer', rgb: '139,92,246' },
+    { icon: '🔮', name: 'Dragon Ball', rgb: '245,158,11' },
+    { icon: '🏰', name: 'Attack on Titan', rgb: '107,114,128' },
+    { icon: '🌙', name: 'Bleach', rgb: '6,182,212' },
+    { icon: '🤖', name: 'Evangelion', rgb: '16,185,129' },
+    { icon: '💪', name: 'My Hero Academia', rgb: '239,68,68' },
+    { icon: '🃏', name: 'Jujutsu Kaisen', rgb: '99,102,241' },
+    { icon: '🦊', name: 'Inuyasha', rgb: '251,146,60' },
+];
 
 const categories = [
     { id: 'action-figures', label: 'Action Figures', icon: '🗡️', desc: 'Premium collectibles', color: '#e63946' },
@@ -22,9 +33,24 @@ const animes = [
     { name: 'Attack on Titan', icon: '🏰', color: '#6b7280' },
 ];
 
+// ── Flash Sale Timer: persists in localStorage so it doesn't reset on page refresh ──
+function getFlashSaleTarget() {
+    const stored = localStorage.getItem('animestore_flash_end');
+    if (stored) {
+        const storedTime = parseInt(stored, 10);
+        if (storedTime > Date.now()) return storedTime;
+    }
+    const t = new Date();
+    t.setHours(23, 59, 59, 0);
+    const target = t.getTime();
+    localStorage.setItem('animestore_flash_end', target.toString());
+    return target;
+}
+
 export default function Home() {
     const [featured, setFeatured] = useState([]);
     const [loading, setLoading] = useState(true);
+
 
     useEffect(() => {
         // Show top 8 products by reviews (most popular)
@@ -34,17 +60,17 @@ export default function Home() {
     }, []);
 
 
-    // ── Countdown Timer (24h sale) ──
-    const getTarget = () => {
-        const t = new Date();
-        t.setHours(23, 59, 59, 0);
-        return t;
-    };
+
     const [timeLeft, setTimeLeft] = useState({ h: 0, m: 0, s: 0 });
     useEffect(() => {
+        const target = getFlashSaleTarget();
         const tick = () => {
-            const diff = getTarget() - Date.now();
-            if (diff <= 0) return;
+            const diff = target - Date.now();
+            if (diff <= 0) {
+                localStorage.removeItem('animestore_flash_end');
+                setTimeLeft({ h: 0, m: 0, s: 0 });
+                return;
+            }
             setTimeLeft({
                 h: Math.floor(diff / 3600000),
                 m: Math.floor((diff % 3600000) / 60000),
@@ -60,8 +86,8 @@ export default function Home() {
 
     return (
         <div className="home">
-            {/* ── HERO ── */}
 
+            {/* ── HERO ── */}
             <section className="hero">
                 <div className="hero__bg">
                     <div className="hero__orb hero__orb--1" />
@@ -70,60 +96,71 @@ export default function Home() {
                 </div>
                 <div className="container hero__content">
                     <div className="hero__text">
-                        <div className="hero__pill">🎌 Premium Anime Merchandise</div>
+                        <div className="hero__pill">✨ 500+ Anime Products</div>
                         <h1 className="hero__title">
-                            Your World.<br />
-                            <span className="hero__title-accent">Your Anime.</span>
+                            Your Ultimate<br />
+                            <span className="hero__title-accent">Anime Store</span>
                         </h1>
                         <p className="hero__subtitle">
-                            Discover thousands of authentic anime collectibles — action figures, posters,
-                            keychains, clothing and more. From Naruto to One Piece, we've got it all!
+                            Premium collectibles, posters, keychains & clothing from your favourite anime series. Fast delivery across India. 🇮🇳
                         </p>
                         <div className="hero__actions">
-                            <Link to="/shop" className="btn btn-primary btn-lg" id="shop-now-btn">
-                                🛒 Shop Now
-                            </Link>
-                            <Link to="/shop" className="btn btn-gold btn-lg hero__offer-btn" id="flash-deal-btn">
-                                ⚡ Flash Deals — Up to 20% Off
-                            </Link>
+                            <Link to="/shop" className="btn btn-primary btn-lg" id="hero-shop-btn">Shop Now →</Link>
+                            <Link to="/shop?search=new" className="btn btn-gold btn-lg hero__offer-btn" id="hero-offer-btn">🔥 Today's Offers</Link>
                         </div>
                         <div className="hero__stats">
-                            {[
-                                { value: '30+', label: 'Products' },
-                                { value: '5', label: 'Categories' },
-                                { value: '10K+', label: 'Happy Fans' },
-                                { value: '4.8★', label: 'Avg Rating' },
-                            ].map(s => (
-                                <div key={s.label} className="hero__stat">
-                                    <span className="hero__stat-value">{s.value}</span>
-                                    <span className="hero__stat-label">{s.label}</span>
-                                </div>
-                            ))}
+                            <div className="hero__stat">
+                                <span className="hero__stat-value">500+</span>
+                                <span className="hero__stat-label">Products</span>
+                            </div>
+                            <div className="hero__stat">
+                                <span className="hero__stat-value">10K+</span>
+                                <span className="hero__stat-label">Happy Fans</span>
+                            </div>
+                            <div className="hero__stat">
+                                <span className="hero__stat-value">4.9★</span>
+                                <span className="hero__stat-label">Rating</span>
+                            </div>
                         </div>
                     </div>
                     <div className="hero__visual">
-                        <div className="hero__float-cards">
-                            {[
-                                { icon: '🗡️', label: 'Action Figures', color: '#e63946', path: '/shop/action-figures', pos: 1 },
-                                { icon: '🔮', label: 'Accessories', color: '#7c3aed', path: '/shop/accessories', pos: 2 },
-                                { icon: '⚔️', label: 'Demon Slayer', color: '#8b5cf6', path: '/shop?search=Demon+Slayer', pos: 3 },
-                                { icon: '🍥', label: 'Naruto', color: '#f97316', path: '/shop?search=Naruto', pos: 4 },
-                                { icon: '☠️', label: 'One Piece', color: '#3b82f6', path: '/shop?search=One+Piece', pos: 5 },
-                            ].map((card) => (
-                                <Link
-                                    key={card.label}
-                                    to={card.path}
-                                    className={`hero__float-card hero__float-card--${card.pos}`}
-                                    style={{ '--card-color': card.color }}
-                                >
-                                    <span className="hero__float-icon">{card.icon}</span>
-                                    <span className="hero__float-label">{card.label}</span>
-                                </Link>
-                            ))}
+                        <div className="hero__panel">
+                            <div className="hero__panel-glow" />
+                            <Link to="/shop" className="hero__panel-center">
+                                <span className="hero__panel-emoji">⛩️</span>
+                                <span className="hero__panel-tagline">ANIME STORE</span>
+                            </Link>
+                            <Link to="/shop" className="hero__badge hero__badge--tl">
+                                <span className="hero__badge-icon">⭐</span>
+                                <div>
+                                    <div className="hero__badge-val">4.9 / 5</div>
+                                    <div className="hero__badge-key">Top Rated</div>
+                                </div>
+                            </Link>
+                            <Link to="/shop" className="hero__badge hero__badge--tr">
+                                <span className="hero__badge-icon">📦</span>
+                                <div>
+                                    <div className="hero__badge-val">500+</div>
+                                    <div className="hero__badge-key">Products</div>
+                                </div>
+                            </Link>
+                            <Link to="/about" className="hero__badge hero__badge--bl">
+                                <span className="hero__badge-icon">🚀</span>
+                                <div>
+                                    <div className="hero__badge-val">24hr</div>
+                                    <div className="hero__badge-key">Fast Ship</div>
+                                </div>
+                            </Link>
+                            <Link to="/about" className="hero__badge hero__badge--br">
+                                <span className="hero__badge-icon">✅</span>
+                                <div>
+                                    <div className="hero__badge-val">100%</div>
+                                    <div className="hero__badge-key">Authentic</div>
+                                </div>
+                            </Link>
                         </div>
                     </div>
                 </div>
-                {/* Scroll indicator */}
                 <div className="hero__scroll">
                     <div className="scroll-dot" />
                     <span>Scroll to explore</span>
@@ -132,34 +169,32 @@ export default function Home() {
 
             {/* ── MARQUEE ── */}
             <div className="marquee-wrapper">
-                {/* Row 1: left scroll */}
                 <div className="marquee-strip">
                     <div className="marquee-track marquee-left">
-                        {[...animes, ...animes, ...animes].map((a, i) => (
+                        {[...marqueeItems, ...marqueeItems, ...marqueeItems].map((item, i) => (
                             <Link
                                 key={i}
-                                to={`/shop?search=${encodeURIComponent(a.name)}`}
+                                to={`/shop?search=${encodeURIComponent(item.name)}`}
                                 className="marquee-item"
-                                style={{ '--item-color': a.color }}
+                                style={{ '--item-color': `rgb(${item.rgb})` }}
                             >
-                                <span className="marquee-item__icon">{a.icon}</span>
-                                <span className="marquee-item__name">{a.name}</span>
+                                <span className="marquee-item__icon">{item.icon}</span>
+                                <span className="marquee-item__name">{item.name}</span>
                             </Link>
                         ))}
                     </div>
                 </div>
-                {/* Row 2: right scroll */}
                 <div className="marquee-strip marquee-strip--reverse">
                     <div className="marquee-track marquee-right">
-                        {[...animes, ...animes, ...animes].reverse().map((a, i) => (
+                        {[...marqueeItems, ...marqueeItems, ...marqueeItems].reverse().map((item, i) => (
                             <Link
                                 key={i}
-                                to={`/shop?search=${encodeURIComponent(a.name)}`}
+                                to={`/shop?search=${encodeURIComponent(item.name)}`}
                                 className="marquee-item marquee-item--outlined"
-                                style={{ '--item-color': a.color }}
+                                style={{ '--item-color': `rgb(${item.rgb})` }}
                             >
-                                <span className="marquee-item__icon">{a.icon}</span>
-                                <span className="marquee-item__name">{a.name}</span>
+                                <span className="marquee-item__icon">{item.icon}</span>
+                                <span className="marquee-item__name">{item.name}</span>
                             </Link>
                         ))}
                     </div>
@@ -277,7 +312,7 @@ export default function Home() {
                                 to={`/shop?search=${encodeURIComponent(a.name)}`}
                                 className="anime-card"
                                 style={{ '--anime-color': a.color }}
-                                id={`anime-${a.name.toLowerCase().replace(' ', '-')}`}
+                                id={`anime-${a.name.toLowerCase().replace(/\s+/g, '-')}`}
                             >
                                 <span className="anime-card__icon">{a.icon}</span>
                                 <span className="anime-card__name">{a.name}</span>

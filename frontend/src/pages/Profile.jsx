@@ -43,15 +43,17 @@ export default function Profile() {
             setLoadingData(true);
             axios.get('/api/auth/profile')
                 .then(r => setOrders(r.data.user.orders || []))
+                .catch(() => addToast('Could not load orders. Check connection.', 'error'))
                 .finally(() => setLoadingData(false));
         }
         if (activeTab === 'wishlist' && user) {
             setLoadingData(true);
             axios.get('/api/auth/wishlist')
                 .then(r => setWishlistProducts(r.data.products || []))
+                .catch(() => addToast('Could not load wishlist. Check connection.', 'error'))
                 .finally(() => setLoadingData(false));
         }
-    }, [activeTab, user]);
+    }, [activeTab, user, addToast]);
 
     const handleSaveProfile = async (e) => {
         e.preventDefault();
