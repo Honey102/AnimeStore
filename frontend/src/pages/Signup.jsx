@@ -20,7 +20,7 @@ function getStrengthLabel(password) {
 }
 
 export default function Signup() {
-    const { register } = useAuth();
+    const { register, user, loading: authLoading } = useAuth();
     const { addToast } = useContext(ToastContext);
     const navigate = useNavigate();
 
@@ -28,6 +28,12 @@ export default function Signup() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showPass, setShowPass] = useState(false);
+
+    useEffect(() => {
+        if (user && !authLoading) {
+            navigate('/profile', { replace: true });
+        }
+    }, [user, authLoading, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

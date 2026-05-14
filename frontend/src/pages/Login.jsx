@@ -5,7 +5,7 @@ import { ToastContext } from '../App';
 import './Auth.css';
 
 export default function Login() {
-    const { login } = useAuth();
+    const { login, user, loading: authLoading } = useAuth();
     const { addToast } = useContext(ToastContext);
     const navigate = useNavigate();
     const location = useLocation();
@@ -15,6 +15,12 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showPass, setShowPass] = useState(false);
+
+    useEffect(() => {
+        if (user && !authLoading) {
+            navigate(from, { replace: true });
+        }
+    }, [user, authLoading, navigate, from]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

@@ -19,7 +19,7 @@ const TABS = [
 ];
 
 export default function Profile() {
-    const { user, logout, updateProfile, isWishlisted } = useAuth();
+    const { user, loading, logout, updateProfile, isWishlisted } = useAuth();
     const { addToast } = useContext(ToastContext);
     const navigate = useNavigate();
     const location = useLocation();
@@ -34,9 +34,9 @@ export default function Profile() {
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
-        if (!user) { navigate('/login', { state: { from: '/profile' } }); return; }
-        setEditForm({ name: user.name, favoriteAnime: user.favoriteAnime || '' });
-    }, [user, navigate]);
+        if (!loading && !user) { navigate('/login', { state: { from: '/profile' } }); return; }
+        if (user) setEditForm({ name: user.name, favoriteAnime: user.favoriteAnime || '' });
+    }, [user, loading, navigate]);
 
     useEffect(() => {
         if (activeTab === 'orders' && user) {
@@ -74,6 +74,14 @@ export default function Profile() {
         navigate('/');
     };
 
+    if (loading) {
+        return (
+            <div className="profile-page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+                <div className="spinner" />
+            </div>
+        );
+    }
+    
     if (!user) return null;
 
     const avatarUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(user.name)}&backgroundColor=b6e3f4`;
