@@ -3,10 +3,13 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
-// In production (Vercel), use the Render backend URL from env variable.
-// In local dev, relative paths work fine via Vite's proxy.
+// In production (Vercel), use the Render backend URL.
+// Priority: env variable → hardcoded Render URL → Vite proxy (local dev)
 if (import.meta.env.VITE_API_URL) {
     axios.defaults.baseURL = import.meta.env.VITE_API_URL;
+} else if (import.meta.env.PROD) {
+    // Production build without env var — use hardcoded Render backend
+    axios.defaults.baseURL = 'https://animestore-backend.onrender.com';
 }
 
 // Axios interceptor: attach JWT token to every request

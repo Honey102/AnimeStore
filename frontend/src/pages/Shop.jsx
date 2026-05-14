@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
+import API_BASE from '../utils/apiBase';
 import './Shop.css';
 
 const CATEGORIES = [
@@ -34,7 +35,7 @@ export default function Shop() {
 
     const fetchProducts = useCallback(() => {
         setLoading(true);
-        fetch('/api/products')
+        fetch(`${API_BASE}/api/products`)
             .then(r => r.json())
             .then(data => {
                 let filtered = [...(data.products || [])];

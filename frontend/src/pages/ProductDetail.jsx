@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { ToastContext } from '../App';
 import ProductCard from '../components/ProductCard';
+import API_BASE from '../utils/apiBase';
 import './ProductDetail.css';
 
 function formatPrice(p) { return `₹${p.toLocaleString('en-IN')}`; }
@@ -39,7 +40,7 @@ export default function ProductDetail() {
         setQty(1);
         setActiveTab('Description');
         setActiveThumb(0);
-        fetch('/api/products')
+        fetch(`${API_BASE}/api/products`)
             .then(r => r.json())
             .then(data => {
                 const all = data.products || [];

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
+import API_BASE from '../utils/apiBase';
 import './Home.css';
 
 const marqueeItems = [
@@ -52,7 +53,7 @@ export default function Home() {
 
 
     useEffect(() => {
-        fetch('/api/products')
+        fetch(`${API_BASE}/api/products`)
             .then(r => r.json())
             .then(data => {
                 const top = [...(data.products || [])].sort((a, b) => b.reviews - a.reviews).slice(0, 8);
