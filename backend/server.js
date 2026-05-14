@@ -13,7 +13,8 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  process.env.FRONTEND_URL,          // e.g. https://animestore.vercel.app
+  'https://anime-store-zeta-one.vercel.app', // hardcoded production URL
+  process.env.FRONTEND_URL,          // optional override via env
 ].filter(Boolean);
 
 // Middleware
