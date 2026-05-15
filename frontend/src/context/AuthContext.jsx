@@ -9,7 +9,7 @@ if (import.meta.env.VITE_API_URL) {
     axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 } else if (import.meta.env.PROD) {
     // Production build without env var — use hardcoded Render backend
-    axios.defaults.baseURL = 'https://animestore-backend.onrender.com';
+    axios.defaults.baseURL = 'https://animestore-aito.onrender.com';
 }
 
 // Axios interceptor: attach JWT token to every request

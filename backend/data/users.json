@@ -1,1 +1,35 @@
-[]
+[
+  {
+    "id": "user_1778765549116",
+    "name": "Test User",
+    "email": "test@example.com",
+    "password": "$2b$10$wSoxu1KpWVnOGUfOdk1XiezMGJyIyDHFIDVx87bPYXhJbQQ3vjqIO",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Test%20User",
+    "favoriteAnime": "",
+    "wishlist": [],
+    "orders": [],
+    "createdAt": "2026-05-14T13:32:29.116Z"
+  },
+  {
+    "id": "user_1778765911703",
+    "name": "Test User",
+    "email": "test1@example.com",
+    "password": "$2b$10$e0Dl0IffOUf7.8g1UVgqZ.2Yb4qaZJ0gQQ7Dv.B8/c1SocrlEdrm6",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Test%20User",
+    "favoriteAnime": "",
+    "wishlist": [],
+    "orders": [],
+    "createdAt": "2026-05-14T13:38:31.703Z"
+  },
+  {
+    "id": "user_1778767210531",
+    "name": "Test User 2",
+    "email": "test2@example.com",
+    "password": "$2b$10$bTZIc30QDm.w6CvKr1dxSOfS6PuWK6HdE3jcY7M0kch5A7UIgjt3C",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Test%20User%202",
+    "favoriteAnime": "",
+    "wishlist": [],
+    "orders": [],
+    "createdAt": "2026-05-14T14:00:10.531Z"
+  }
+]
