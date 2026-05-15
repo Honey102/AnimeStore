@@ -1,10 +1,14 @@
 import React, { createContext, useContext, useState } from 'react';
 import axios from 'axios';
+import API_BASE from '../utils/apiBase';
 
 const AdminContext = createContext(null);
 
 // Shared axios instance that auto-attaches admin token
-const adminAPI = axios.create();
+const adminAPI = axios.create({
+    baseURL: API_BASE
+});
+
 adminAPI.interceptors.request.use(config => {
     const token = sessionStorage.getItem('animestore_admin_token');
     if (token) config.headers.Authorization = `Bearer ${token}`;
@@ -15,7 +19,7 @@ export function AdminProvider({ children }) {
     const [isAdmin, setIsAdmin] = useState(() => !!sessionStorage.getItem('animestore_admin_token'));
 
     const adminLogin = async (password) => {
-        const res = await axios.post('/api/admin/login', { password });
+        const res = await axios.post(`${API_BASE}/api/admin/login`, { password });
         sessionStorage.setItem('animestore_admin_token', res.data.token);
         setIsAdmin(true);
         return res.data;
