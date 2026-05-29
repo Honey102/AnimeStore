@@ -5,6 +5,7 @@ const productsRouter = require('./routes/products');
 const ordersRouter = require('./routes/orders');
 const { router: authRouter } = require('./routes/auth');
 const adminRouter = require('./routes/admin');
+require('./db'); // Initialize PostgreSQL connection on startup
 
 const app = express();
 const PORT = process.env.PORT || 5000;

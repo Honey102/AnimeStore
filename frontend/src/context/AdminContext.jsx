@@ -18,8 +18,8 @@ adminAPI.interceptors.request.use(config => {
 export function AdminProvider({ children }) {
     const [isAdmin, setIsAdmin] = useState(() => !!sessionStorage.getItem('animestore_admin_token'));
 
-    const adminLogin = async (password) => {
-        const res = await axios.post(`${API_BASE}/api/admin/login`, { password });
+    const adminLogin = async (email, password) => {
+        const res = await axios.post(`${API_BASE}/api/admin/login`, { email, password });
         sessionStorage.setItem('animestore_admin_token', res.data.token);
         setIsAdmin(true);
         return res.data;

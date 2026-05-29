@@ -3,11 +3,21 @@ services:
     name: animestore-backend
     runtime: node
     rootDir: backend
-    buildCommand: npm install
+    buildCommand: npm install && node migrate.js
     startCommand: node server.js
     envVars:
+      - key: NODE_ENV
+        value: production
       - key: JWT_SECRET
-        generateValue: true          # Render will auto-generate a secure value
+        generateValue: true
+      - key: ADMIN_JWT_SECRET
+        generateValue: true
+      - key: ADMIN_EMAIL
+        value: hiteshgautam326@gmail.com
+      - key: ADMIN_PASSWORD
+        value: hitesh312
+      - key: DATABASE_URL
+        sync: false          # You will paste Neon connection string here
       - key: FRONTEND_URL
-        value: https://your-animestore.vercel.app   # ← CHANGE THIS after Vercel deploy
+        sync: false          # You will paste Vercel URL here after deploy
     healthCheckPath: /api/health

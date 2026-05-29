@@ -7,6 +7,7 @@ import './Admin.css';
 export default function AdminLogin() {
     const { isAdmin, adminLogin } = useAdmin();
     const { addToast } = useContext(ToastContext);
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -18,10 +19,10 @@ export default function AdminLogin() {
         setError('');
         setLoading(true);
         try {
-            await adminLogin(password);
+            await adminLogin(email, password);
             addToast('Welcome, Admin! 🎌', 'success');
         } catch (err) {
-            setError(err.response?.data?.message || 'Invalid password. Try again.');
+            setError(err.response?.data?.message || 'Invalid credentials. Try again.');
         } finally {
             setLoading(false);
         }
@@ -36,6 +37,18 @@ export default function AdminLogin() {
 
                 <form onSubmit={handleSubmit} style={{ textAlign: 'left' }}>
                     <div className="admin-field" style={{ marginBottom: '1rem' }}>
+                        <label>Admin Email</label>
+                        <input
+                            id="admin-email"
+                            type="email"
+                            placeholder="admin@example.com"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                            required
+                            autoFocus
+                        />
+                    </div>
+                    <div className="admin-field" style={{ marginBottom: '1.25rem' }}>
                         <label>Admin Password</label>
                         <input
                             id="admin-password"
@@ -44,7 +57,6 @@ export default function AdminLogin() {
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                             required
-                            autoFocus
                         />
                     </div>
                     <button
