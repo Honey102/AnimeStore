@@ -106,7 +106,7 @@ export default function AdminOrders() {
                                                 {STATUS_ICONS[o.status]} {o.status}
                                             </span>
                                         </td>
-                                        <td style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>{fmtDate(o.createdAt)}</td>
+                                        <td style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>{fmtDate(o.created_at || o.createdAt)}</td>
                                         <td>
                                             <div className="admin-actions">
                                                 <button className="admin-btn admin-btn--secondary" style={{ fontSize: '0.78rem' }} onClick={() => setSelected(o)}>

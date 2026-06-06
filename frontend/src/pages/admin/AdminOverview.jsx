@@ -90,7 +90,7 @@ export default function AdminOverview() {
                                 <span className="order-name">{o.customer?.name || 'Guest'}</span>
                                 <span className="order-amt">{formatPrice(o.total || 0)}</span>
                                 <span className={`status-badge ${statusColors[o.status] || ''}`}>{o.status}</span>
-                                <span className="order-time">{timeAgo(o.createdAt)}</span>
+                                <span className="order-time">{timeAgo(o.created_at || o.createdAt)}</span>
                             </div>
                         ))}
                     </div>

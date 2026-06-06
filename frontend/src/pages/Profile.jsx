@@ -46,8 +46,9 @@ export default function Profile() {
     useEffect(() => {
         if (activeTab === 'orders' && user) {
             setLoadingData(true);
-            axios.get('/api/auth/profile')
-                .then(r => setOrders(r.data.user.orders || []))
+            // ✅ Correct endpoint — returns full order objects with items, total, status
+            axios.get('/api/auth/orders')
+                .then(r => setOrders(r.data.orders || []))
                 .catch(() => addToast('Could not load orders. Check connection.', 'error'))
                 .finally(() => setLoadingData(false));
         }
@@ -128,7 +129,7 @@ export default function Profile() {
                         {user.favoriteAnime && (
                             <p className="profile-fave">🎌 Favorite: <strong>{user.favoriteAnime}</strong></p>
                         )}
-                        <p className="profile-joined">Member since {formatDate(user.createdAt)}</p>
+                        <p className="profile-joined">Member since {formatDate(user.createdAt || user.created_at)}</p>
                     </div>
                     <button className="btn btn-secondary btn-sm profile-logout-btn" onClick={handleLogout} id="logout-btn">
                         🚪 Logout
@@ -194,20 +195,31 @@ export default function Profile() {
                             </div>
                         ) : (
                             <div className="orders-list">
-                                {orders.map(order => (
+                                {orders.map(order => {
+                                    // ✅ DB returns snake_case — support both
+                                    const createdAt = order.created_at || order.createdAt;
+                                    const items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []);
+                                    const statusColors = {
+                                        confirmed: '#3b82f6',
+                                        shipped:   '#f59e0b',
+                                        delivered: '#10b981',
+                                        cancelled: '#ef4444',
+                                    };
+                                    const dotColor = statusColors[order.status] || '#6b7280';
+                                    return (
                                     <div key={order.id} className="order-card">
                                         <div className="order-card__header">
                                             <div>
                                                 <span className="order-id">{order.id}</span>
-                                                <span className="order-date">{formatDate(order.createdAt)}</span>
+                                                <span className="order-date">{createdAt ? formatDate(createdAt) : '—'}</span>
                                             </div>
                                             <div className="order-status">
-                                                <span className="status-dot" />
-                                                {order.status}
+                                                <span className="status-dot" style={{ background: dotColor, boxShadow: `0 0 6px ${dotColor}` }} />
+                                                <span style={{ color: dotColor, fontWeight: 600, textTransform: 'capitalize' }}>{order.status}</span>
                                             </div>
                                         </div>
                                         <div className="order-items-list">
-                                            {order.items?.map((item, i) => (
+                                            {items.map((item, i) => (
                                                 <div key={i} className="order-item-row">
                                                     <span className="order-item-name">{item.name}</span>
                                                     <span className="order-item-qty">×{item.quantity}</span>
@@ -217,9 +229,11 @@ export default function Profile() {
                                         </div>
                                         <div className="order-card__footer">
                                             <span>Total: <strong style={{ color: 'var(--accent-gold)' }}>{formatPrice(order.total)}</strong></span>
+                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{items.length} item{items.length !== 1 ? 's' : ''}</span>
                                         </div>
                                     </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
