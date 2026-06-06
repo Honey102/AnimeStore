@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAdmin } from '../../context/AdminContext';
 import { ToastContext } from '../../App';
 import './Admin.css';
@@ -7,6 +7,7 @@ import './Admin.css';
 export default function AdminLogin() {
     const { isAdmin, adminLogin } = useAdmin();
     const { addToast } = useContext(ToastContext);
+    const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -21,6 +22,7 @@ export default function AdminLogin() {
         try {
             await adminLogin(email, password);
             addToast('Welcome, Admin! 🎌', 'success');
+            navigate('/admin', { replace: true }); // ✅ Explicit redirect after login
         } catch (err) {
             setError(err.response?.data?.message || 'Invalid credentials. Try again.');
         } finally {
