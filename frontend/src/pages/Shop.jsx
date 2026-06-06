@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import API_BASE from '../utils/apiBase';
@@ -33,28 +33,23 @@ export default function Shop() {
 
     const [localSearch, setLocalSearch] = useState(searchQuery);
 
+    // Debounce timer ref
+    const debounceRef = useRef(null);
+
     const fetchProducts = useCallback(() => {
         setLoading(true);
-        fetch(`${API_BASE}/api/products`)
+
+        // Build URL with server-side filters — no client-side filtering needed!
+        const params = new URLSearchParams();
+        if (activeCategory !== 'all') params.set('category', activeCategory);
+        if (searchQuery) params.set('search', searchQuery);
+        if (sort) params.set('sort', sort);
+
+        fetch(`${API_BASE}/api/products?${params.toString()}`)
             .then(r => r.json())
             .then(data => {
-                let filtered = [...(data.products || [])];
-                if (activeCategory !== 'all') filtered = filtered.filter(p => p.category === activeCategory);
-                if (searchQuery) {
-                    const q = searchQuery.toLowerCase();
-                    filtered = filtered.filter(p =>
-                        p.name.toLowerCase().includes(q) ||
-                        p.anime.toLowerCase().includes(q) ||
-                        (p.tags || []).some(t => t.includes(q))
-                    );
-                }
-                if (sort === 'rating') filtered.sort((a, b) => b.rating - a.rating);
-                else if (sort === 'price-asc') filtered.sort((a, b) => a.price - b.price);
-                else if (sort === 'price-desc') filtered.sort((a, b) => b.price - a.price);
-                else filtered.sort((a, b) => b.reviews - a.reviews);
-
-                setProducts(filtered);
-                setCount(filtered.length);
+                setProducts(data.products || []);
+                setCount(data.count || 0);
             })
             .catch(() => {
                 setProducts([]);
@@ -66,13 +61,25 @@ export default function Shop() {
     useEffect(() => { fetchProducts(); }, [fetchProducts]);
     useEffect(() => { setLocalSearch(searchQuery); }, [searchQuery]);
 
-
     const handleSearch = (e) => {
         e.preventDefault();
         const params = new URLSearchParams(searchParams);
         if (localSearch.trim()) params.set('search', localSearch.trim());
         else params.delete('search');
         setSearchParams(params);
+    };
+
+    // Live search with debounce (300ms)
+    const handleSearchInput = (e) => {
+        const val = e.target.value;
+        setLocalSearch(val);
+        clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            const params = new URLSearchParams(searchParams);
+            if (val.trim()) params.set('search', val.trim());
+            else params.delete('search');
+            setSearchParams(params);
+        }, 300);
     };
 
     const navigate = useNavigate();
@@ -119,7 +126,7 @@ export default function Shop() {
                             type="search"
                             placeholder="Search products, anime, characters..."
                             value={localSearch}
-                            onChange={e => setLocalSearch(e.target.value)}
+                            onChange={handleSearchInput}
                             id="shop-search-input"
                         />
                         <button type="submit" className="btn btn-primary btn-sm">Search</button>

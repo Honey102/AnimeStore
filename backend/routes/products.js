@@ -21,9 +21,9 @@ function toProduct(p) {
     };
 }
 
-// GET /api/products — all products with optional filters
+// GET /api/products — all products with optional server-side filters
 router.get('/', async (req, res) => {
-    const { category, search, sort, anime } = req.query;
+    const { category, search, sort, anime, limit } = req.query;
     try {
         let query = 'SELECT * FROM products WHERE 1=1';
         const params = [];
@@ -49,8 +49,16 @@ router.get('/', async (req, res) => {
         else if (sort === 'popular') query += ' ORDER BY reviews DESC';
         else query += ' ORDER BY id ASC';
 
+        // Optional limit
+        if (limit && parseInt(limit) > 0) {
+            query += ` LIMIT ${parseInt(limit)}`;
+        }
+
         const result = await pool.query(query, params);
         const products = result.rows.map(toProduct);
+
+        // Cache for 30 seconds — products rarely change mid-session
+        res.set('Cache-Control', 'public, max-age=30, stale-while-revalidate=60');
         res.json({ success: true, count: products.length, products });
     } catch (err) {
         console.error('Products fetch error:', err);
@@ -83,6 +91,8 @@ router.get('/flash-sale', async (req, res) => {
                 discountPct: Math.round(((p.original_price - p.price) / p.original_price) * 100)
             }));
         }
+
+        res.set('Cache-Control', 'public, max-age=30, stale-while-revalidate=60');
         res.json({ success: true, products, flashTitle: flashConfig.title || "Today's Hot Deals" });
     } catch (err) {
         console.error('Flash sale error:', err);
@@ -90,12 +100,13 @@ router.get('/flash-sale', async (req, res) => {
     }
 });
 
-// GET /api/products/featured
+// GET /api/products/featured — top badged products for Home page
 router.get('/featured', async (req, res) => {
     try {
         const result = await pool.query(
-            `SELECT * FROM products WHERE badge != '' AND badge IS NOT NULL LIMIT 8`
+            `SELECT * FROM products ORDER BY reviews DESC LIMIT 8`
         );
+        res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=120');
         res.json({ success: true, products: result.rows.map(toProduct) });
     } catch (err) {
         console.error('Featured error:', err);
@@ -114,6 +125,7 @@ router.get('/categories', async (req, res) => {
             { id: 'clothing',       label: 'Clothing',       icon: '👕' },
             { id: 'accessories',    label: 'Accessories',    icon: '✨' },
         ];
+        res.set('Cache-Control', 'public, max-age=120');
         res.json({ success: true, categories: [{ id: 'all', label: 'All Products', icon: '🎌' }, ...cats] });
     } catch (err) {
         console.error('Categories error:', err);
@@ -132,6 +144,8 @@ router.get('/:id', async (req, res) => {
             'SELECT * FROM products WHERE category = $1 AND id != $2 LIMIT 4',
             [product.category, product.id]
         );
+
+        res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=120');
         res.json({ success: true, product: toProduct(product), related: related.rows.map(toProduct) });
     } catch (err) {
         console.error('Product detail error:', err);

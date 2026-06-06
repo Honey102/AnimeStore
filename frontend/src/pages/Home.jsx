@@ -53,12 +53,10 @@ export default function Home() {
 
 
     useEffect(() => {
-        fetch(`${API_BASE}/api/products`)
+        // Use dedicated featured endpoint — fetches only 8 top products, not all 36
+        fetch(`${API_BASE}/api/products/featured`)
             .then(r => r.json())
-            .then(data => {
-                const top = [...(data.products || [])].sort((a, b) => b.reviews - a.reviews).slice(0, 8);
-                setFeatured(top);
-            })
+            .then(data => setFeatured(data.products || []))
             .catch(() => setFeatured([]))
             .finally(() => setLoading(false));
     }, []);

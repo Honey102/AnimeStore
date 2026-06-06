@@ -1,37 +1,51 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import { AdminProvider } from './context/AdminContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import CartSidebar from './components/CartSidebar';
 import Toast from './components/Toast';
 
-// Main site pages
-import Home from './pages/Home';
-import Shop from './pages/Shop';
-import ProductDetail from './pages/ProductDetail';
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import About from './pages/About';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import Profile from './pages/Profile';
-import NotFound from './pages/NotFound';
+// ── Lazy load ALL pages — only downloaded when actually visited ──
+const Home           = lazy(() => import('./pages/Home'));
+const Shop           = lazy(() => import('./pages/Shop'));
+const ProductDetail  = lazy(() => import('./pages/ProductDetail'));
+const Cart           = lazy(() => import('./pages/Cart'));
+const Checkout       = lazy(() => import('./pages/Checkout'));
+const About          = lazy(() => import('./pages/About'));
+const Login          = lazy(() => import('./pages/Login'));
+const Signup         = lazy(() => import('./pages/Signup'));
+const Profile        = lazy(() => import('./pages/Profile'));
+const NotFound       = lazy(() => import('./pages/NotFound'));
 
-// Admin pages
-import AdminLogin from './pages/admin/AdminLogin';
-import AdminLayout from './pages/admin/AdminLayout';
-import AdminOverview from './pages/admin/AdminOverview';
-import AdminProducts from './pages/admin/AdminProducts';
-import AdminOrders from './pages/admin/AdminOrders';
-import AdminUsers from './pages/admin/AdminUsers';
-import AdminOffers from './pages/admin/AdminOffers';
-import AdminCategories from './pages/admin/AdminCategories';
-import AdminSettings from './pages/admin/AdminSettings';
+// Admin pages — completely separate chunk
+const AdminLogin      = lazy(() => import('./pages/admin/AdminLogin'));
+const AdminLayout     = lazy(() => import('./pages/admin/AdminLayout'));
+const AdminOverview   = lazy(() => import('./pages/admin/AdminOverview'));
+const AdminProducts   = lazy(() => import('./pages/admin/AdminProducts'));
+const AdminOrders     = lazy(() => import('./pages/admin/AdminOrders'));
+const AdminUsers      = lazy(() => import('./pages/admin/AdminUsers'));
+const AdminOffers     = lazy(() => import('./pages/admin/AdminOffers'));
+const AdminCategories = lazy(() => import('./pages/admin/AdminCategories'));
+const AdminSettings   = lazy(() => import('./pages/admin/AdminSettings'));
 
 export const ToastContext = React.createContext();
+
+// ── Page loading fallback ──
+function PageLoader() {
+    return (
+        <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            minHeight: '60vh', flexDirection: 'column', gap: '1rem'
+        }}>
+            <div className="spinner" />
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading...</span>
+        </div>
+    );
+}
 
 // ── Scroll to top on every route change ──
 function ScrollToTop() {
@@ -55,33 +69,35 @@ function AppContent({ toasts }) {
                 {!isAdminRoute && <CartSidebar />}
 
                 <main style={{ flex: isAdminRoute ? 'none' : 1 }}>
-                    <Routes>
-                        {/* ── Main Site Routes ── */}
-                        <Route path="/"              element={<Home />} />
-                        <Route path="/shop"          element={<Shop />} />
-                        <Route path="/shop/:category" element={<Shop />} />
-                        <Route path="/product/:id"   element={<ProductDetail />} />
-                        <Route path="/cart"          element={<Cart />} />
-                        <Route path="/checkout"      element={<Checkout />} />
-                        <Route path="/about"         element={<About />} />
-                        <Route path="/login"         element={<Login />} />
-                        <Route path="/signup"        element={<Signup />} />
-                        <Route path="/profile"       element={<Profile />} />
+                    <Suspense fallback={<PageLoader />}>
+                        <Routes>
+                            {/* ── Main Site Routes ── */}
+                            <Route path="/"              element={<Home />} />
+                            <Route path="/shop"          element={<Shop />} />
+                            <Route path="/shop/:category" element={<Shop />} />
+                            <Route path="/product/:id"   element={<ProductDetail />} />
+                            <Route path="/cart"          element={<Cart />} />
+                            <Route path="/checkout"      element={<Checkout />} />
+                            <Route path="/about"         element={<About />} />
+                            <Route path="/login"         element={<Login />} />
+                            <Route path="/signup"        element={<Signup />} />
+                            <Route path="/profile"       element={<Profile />} />
 
-                        {/* ── Admin Routes ── */}
-                        <Route path="/admin/login" element={<AdminLogin />} />
-                        <Route path="/admin" element={<AdminLayout />}>
-                            <Route index          element={<AdminOverview />} />
-                            <Route path="products"   element={<AdminProducts />} />
-                            <Route path="orders"     element={<AdminOrders />} />
-                            <Route path="users"      element={<AdminUsers />} />
-                            <Route path="offers"     element={<AdminOffers />} />
-                            <Route path="categories" element={<AdminCategories />} />
-                            <Route path="settings"   element={<AdminSettings />} />
-                        </Route>
+                            {/* ── Admin Routes ── */}
+                            <Route path="/admin/login" element={<AdminLogin />} />
+                            <Route path="/admin" element={<AdminLayout />}>
+                                <Route index          element={<AdminOverview />} />
+                                <Route path="products"   element={<AdminProducts />} />
+                                <Route path="orders"     element={<AdminOrders />} />
+                                <Route path="users"      element={<AdminUsers />} />
+                                <Route path="offers"     element={<AdminOffers />} />
+                                <Route path="categories" element={<AdminCategories />} />
+                                <Route path="settings"   element={<AdminSettings />} />
+                            </Route>
 
-                        <Route path="*" element={<NotFound />} />
-                    </Routes>
+                            <Route path="*" element={<NotFound />} />
+                        </Routes>
+                    </Suspense>
                 </main>
 
                 {!isAdminRoute && <Footer />}
@@ -106,15 +122,17 @@ export default function App() {
 
     return (
         <ToastContext.Provider value={{ addToast }}>
-            <AuthProvider>
-                <CartProvider>
-                    <AdminProvider>
-                        <BrowserRouter>
-                            <AppContent toasts={toasts} />
-                        </BrowserRouter>
-                    </AdminProvider>
-                </CartProvider>
-            </AuthProvider>
+            <ThemeProvider>
+                <AuthProvider>
+                    <CartProvider>
+                        <AdminProvider>
+                            <BrowserRouter>
+                                <AppContent toasts={toasts} />
+                            </BrowserRouter>
+                        </AdminProvider>
+                    </CartProvider>
+                </AuthProvider>
+            </ThemeProvider>
         </ToastContext.Provider>
     );
 }

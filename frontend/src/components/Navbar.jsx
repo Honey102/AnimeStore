@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import './Navbar.css';
 
 const categories = [
@@ -15,6 +16,7 @@ const categories = [
 export default function Navbar() {
     const { count, toggleCart } = useCart();
     const { user, logout } = useAuth();
+    const { theme, toggleTheme } = useTheme();
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const userMenuRef = useRef(null);
 
@@ -121,6 +123,19 @@ export default function Navbar() {
                         )}
                     </div>
 
+                    {/* Theme Toggle */}
+                    <button
+                        className="navbar__theme-btn"
+                        onClick={toggleTheme}
+                        id="theme-toggle-btn"
+                        aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                        title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                    >
+                        <span className={`theme-icon ${theme === 'dark' ? 'theme-icon--moon' : 'theme-icon--sun'}`}>
+                            {theme === 'dark' ? '🌙' : '☀️'}
+                        </span>
+                    </button>
+
                     <button
                         className="navbar__cart-btn"
                         onClick={toggleCart}
@@ -193,6 +208,13 @@ export default function Navbar() {
                 ))}
                 <Link to="/about" className="mobile-link">ℹ️ About</Link>
                 <div className="mobile-menu-divider" />
+                <button
+                    className="mobile-link mobile-theme-btn"
+                    onClick={toggleTheme}
+                    id="mobile-theme-toggle-btn"
+                >
+                    {theme === 'dark' ? '☀️ Switch to Light Mode' : '🌙 Switch to Dark Mode'}
+                </button>
                 <button className="mobile-link mobile-cart-btn" onClick={() => { toggleCart(); setMobileOpen(false); }}>
                     🛒 Cart {count > 0 && <span className="mobile-cart-count">{count}</span>}
                 </button>
