@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
+import { SkeletonGrid } from '../components/SkeletonCard';
 import API_BASE from '../utils/apiBase';
 import './Home.css';
 
@@ -284,9 +285,7 @@ export default function Home() {
                         <Link to="/shop" className="btn btn-secondary btn-sm">See All →</Link>
                     </div>
                     {loading ? (
-                        <div className="spinner-wrapper">
-                            <div className="spinner" />
-                        </div>
+                        <SkeletonGrid count={8} />
                     ) : (
                         <div className="products-grid">
                             {featured.map(p => <ProductCard key={p.id} product={p} />)}

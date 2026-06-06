@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
+import { SkeletonGrid } from '../components/SkeletonCard';
 import API_BASE from '../utils/apiBase';
 import './Shop.css';
 
@@ -30,8 +31,12 @@ export default function Shop() {
     const activeCategory = urlCategory || searchParams.get('category') || 'all';
     const searchQuery = searchParams.get('search') || '';
     const sort = searchParams.get('sort') || 'popular';
+    const minPrice = searchParams.get('minPrice') || '';
+    const maxPrice = searchParams.get('maxPrice') || '';
 
     const [localSearch, setLocalSearch] = useState(searchQuery);
+    const [localMin, setLocalMin] = useState(minPrice);
+    const [localMax, setLocalMax] = useState(maxPrice);
 
     // Debounce timer ref
     const debounceRef = useRef(null);
@@ -48,18 +53,38 @@ export default function Shop() {
         fetch(`${API_BASE}/api/products?${params.toString()}`)
             .then(r => r.json())
             .then(data => {
-                setProducts(data.products || []);
-                setCount(data.count || 0);
+                let prods = data.products || [];
+                // Client-side price range filter
+                if (minPrice) prods = prods.filter(p => p.price >= Number(minPrice));
+                if (maxPrice) prods = prods.filter(p => p.price <= Number(maxPrice));
+                setProducts(prods);
+                setCount(prods.length);
             })
             .catch(() => {
                 setProducts([]);
                 setCount(0);
             })
             .finally(() => setLoading(false));
-    }, [activeCategory, searchQuery, sort]);
+    }, [activeCategory, searchQuery, sort, minPrice, maxPrice]);
 
     useEffect(() => { fetchProducts(); }, [fetchProducts]);
     useEffect(() => { setLocalSearch(searchQuery); }, [searchQuery]);
+    useEffect(() => { setLocalMin(minPrice); setLocalMax(maxPrice); }, [minPrice, maxPrice]);
+
+    const handlePriceFilter = (e) => {
+        e.preventDefault();
+        const params = new URLSearchParams(searchParams);
+        if (localMin) params.set('minPrice', localMin); else params.delete('minPrice');
+        if (localMax) params.set('maxPrice', localMax); else params.delete('maxPrice');
+        setSearchParams(params);
+    };
+
+    const clearPriceFilter = () => {
+        setLocalMin(''); setLocalMax('');
+        const params = new URLSearchParams(searchParams);
+        params.delete('minPrice'); params.delete('maxPrice');
+        setSearchParams(params);
+    };
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -151,6 +176,63 @@ export default function Shop() {
                             </button>
                         ))}
                     </div>
+
+                    {/* Price Range Filter */}
+                    <div className="sidebar-section">
+                        <h3 className="sidebar-title">Price Range (₹)</h3>
+                        <form onSubmit={handlePriceFilter} className="price-filter-form">
+                            <div className="price-filter-inputs">
+                                <input
+                                    type="number"
+                                    placeholder="Min"
+                                    value={localMin}
+                                    onChange={e => setLocalMin(e.target.value)}
+                                    min="0"
+                                    className="price-filter-input"
+                                    id="price-min"
+                                />
+                                <span className="price-filter-sep">—</span>
+                                <input
+                                    type="number"
+                                    placeholder="Max"
+                                    value={localMax}
+                                    onChange={e => setLocalMax(e.target.value)}
+                                    min="0"
+                                    className="price-filter-input"
+                                    id="price-max"
+                                />
+                            </div>
+                            <div className="price-filter-actions">
+                                <button type="submit" className="btn btn-primary btn-sm" style={{ flex: 1 }}>Apply</button>
+                                {(minPrice || maxPrice) && (
+                                    <button type="button" className="btn btn-secondary btn-sm" onClick={clearPriceFilter}>Clear</button>
+                                )}
+                            </div>
+                            {/* Quick presets */}
+                            <div className="price-presets">
+                                {[
+                                    { label: 'Under ₹299', min: '', max: '299' },
+                                    { label: '₹300–₹999', min: '300', max: '999' },
+                                    { label: '₹1000+', min: '1000', max: '' },
+                                ].map(p => (
+                                    <button
+                                        key={p.label}
+                                        type="button"
+                                        className={`price-preset-btn ${localMin === p.min && localMax === p.max ? 'active' : ''}`}
+                                        onClick={() => {
+                                            setLocalMin(p.min); setLocalMax(p.max);
+                                            const params = new URLSearchParams(searchParams);
+                                            if (p.min) params.set('minPrice', p.min); else params.delete('minPrice');
+                                            if (p.max) params.set('maxPrice', p.max); else params.delete('maxPrice');
+                                            setSearchParams(params);
+                                        }}
+                                    >
+                                        {p.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </form>
+                    </div>
                 </aside>
 
                 {/* Main content */}
@@ -187,10 +269,7 @@ export default function Shop() {
                     </div>
 
                     {loading ? (
-                        <div className="spinner-wrapper">
-                            <div className="spinner" />
-                            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading...</p>
-                        </div>
+                        <SkeletonGrid count={8} />
                     ) : products.length === 0 ? (
                         <div className="shop__empty">
                             <div style={{ fontSize: '4rem' }}>😢</div>

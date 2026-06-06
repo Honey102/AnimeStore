@@ -40,19 +40,18 @@ export default function ProductDetail() {
         setQty(1);
         setActiveTab('Description');
         setActiveThumb(0);
-        fetch(`${API_BASE}/api/products`)
+        // ✅ Use dedicated single-product endpoint — fast & returns related too
+        fetch(`${API_BASE}/api/products/${id}`)
             .then(r => r.json())
             .then(data => {
-                const all = data.products || [];
-                const found = all.find(p => p.id === parseInt(id));
-                if (!found) { navigate('/shop'); return; }
-                setProduct(found);
-                const rel = all.filter(p => p.category === found.category && p.id !== found.id).slice(0, 4);
-                setRelated(rel);
+                if (!data.product) { navigate('/shop'); return; }
+                setProduct(data.product);
+                setRelated(data.related || []);
             })
             .catch(() => navigate('/shop'))
             .finally(() => setLoading(false));
     }, [id, navigate]);
+
 
     if (loading) return (
         <div className="pd-loading-screen">

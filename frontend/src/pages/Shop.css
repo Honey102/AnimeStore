@@ -254,3 +254,82 @@
         align-items: flex-start;
     }
 }
+
+/* ── Price Range Filter ── */
+.price-filter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.price-filter-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.price-filter-input {
+    flex: 1;
+    padding: 0.5rem 0.6rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.82rem;
+    outline: none;
+    transition: var(--transition);
+    width: 0;
+    -moz-appearance: textfield;
+}
+
+.price-filter-input::-webkit-outer-spin-button,
+.price-filter-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+.price-filter-input:focus {
+    border-color: var(--accent-gold);
+}
+
+.price-filter-sep {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.price-filter-actions {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.price-presets {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-top: 0.25rem;
+}
+
+.price-preset-btn {
+    padding: 0.4rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    cursor: pointer;
+    text-align: left;
+    transition: var(--transition);
+}
+
+.price-preset-btn:hover {
+    background: var(--bg-glass-light);
+    color: var(--text-primary);
+    border-color: var(--accent-gold);
+}
+
+.price-preset-btn.active {
+    background: rgba(244, 162, 23, 0.12);
+    color: var(--accent-gold);
+    border-color: var(--accent-gold);
+    font-weight: 600;
+}

@@ -33,6 +33,11 @@ export default function Profile() {
     const [editForm, setEditForm] = useState({ name: user?.name || '', favoriteAnime: user?.favoriteAnime || '' });
     const [saving, setSaving] = useState(false);
 
+    // Password change state
+    const [pwForm, setPwForm] = useState({ current: '', newPw: '', confirm: '' });
+    const [pwSaving, setPwSaving] = useState(false);
+    const [pwError, setPwError] = useState('');
+
     useEffect(() => {
         if (!loading && !user) { navigate('/login', { state: { from: '/profile' } }); return; }
         if (user) setEditForm({ name: user.name, favoriteAnime: user.favoriteAnime || '' });
@@ -72,6 +77,28 @@ export default function Profile() {
         logout();
         addToast('Logged out. See you soon! 👋', 'info');
         navigate('/');
+    };
+
+    const handlePasswordChange = async (e) => {
+        e.preventDefault();
+        setPwError('');
+        if (pwForm.newPw.length < 6) { setPwError('New password must be at least 6 characters'); return; }
+        if (pwForm.newPw !== pwForm.confirm) { setPwError('Passwords do not match!'); return; }
+        setPwSaving(true);
+        try {
+            await axios.put('/api/auth/change-password', {
+                currentPassword: pwForm.current,
+                newPassword: pwForm.newPw
+            });
+            addToast('Password changed successfully! 🔒', 'success');
+            setPwForm({ current: '', newPw: '', confirm: '' });
+        } catch (err) {
+            const msg = err.response?.data?.message || 'Failed to change password';
+            setPwError(msg);
+            addToast(msg, 'error');
+        } finally {
+            setPwSaving(false);
+        }
     };
 
     if (loading) {
@@ -257,6 +284,51 @@ export default function Profile() {
 
                         {/* Danger zone */}
                         <div className="settings-danger">
+                            <h3>Change Password 🔒</h3>
+                            <form onSubmit={handlePasswordChange} className="settings-form" style={{ marginBottom: '1.5rem' }}>
+                                <div className="form-group">
+                                    <label htmlFor="pw-current">Current Password</label>
+                                    <input
+                                        id="pw-current"
+                                        type="password"
+                                        placeholder="Enter current password"
+                                        value={pwForm.current}
+                                        onChange={e => setPwForm(f => ({ ...f, current: e.target.value }))}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="pw-new">New Password</label>
+                                    <input
+                                        id="pw-new"
+                                        type="password"
+                                        placeholder="Min. 6 characters"
+                                        value={pwForm.newPw}
+                                        onChange={e => setPwForm(f => ({ ...f, newPw: e.target.value }))}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="pw-confirm">Confirm New Password</label>
+                                    <input
+                                        id="pw-confirm"
+                                        type="password"
+                                        placeholder="Repeat new password"
+                                        value={pwForm.confirm}
+                                        onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))}
+                                        required
+                                    />
+                                </div>
+                                {pwError && (
+                                    <div style={{ color: 'var(--accent-red)', fontSize: '0.85rem', padding: '0.5rem 0.75rem', background: 'rgba(230,57,70,0.08)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(230,57,70,0.2)' }}>
+                                        ⚠️ {pwError}
+                                    </div>
+                                )}
+                                <button type="submit" className="btn btn-secondary" disabled={pwSaving} id="change-pw-btn">
+                                    {pwSaving ? 'Changing...' : '🔒 Change Password'}
+                                </button>
+                            </form>
+
                             <h3>Account Actions</h3>
                             <button className="btn btn-secondary" onClick={handleLogout} id="settings-logout-btn">
                                 🚪 Logout of Account
