@@ -38,12 +38,18 @@ export function AuthProvider({ children }) {
                     setWishlistIds(r.data.user.wishlist || []);
                     localStorage.setItem('animestore_user', JSON.stringify(r.data.user));
                 })
-                .catch(() => logout()) // Token expired
+                .catch(() => {
+                    // ✅ Fix: avoid stale closure by directly clearing storage instead of calling logout()
+                    localStorage.removeItem('animestore_token');
+                    localStorage.removeItem('animestore_user');
+                    setUser(null);
+                    setWishlistIds([]);
+                })
                 .finally(() => setLoading(false));
         } else {
             setLoading(false);
         }
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const login = async (email, password) => {
         const res = await axios.post('/api/auth/login', { email, password });

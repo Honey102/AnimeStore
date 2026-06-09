@@ -152,6 +152,15 @@ export default function Shop() {
                             placeholder="Search products, anime, characters..."
                             value={localSearch}
                             onChange={handleSearchInput}
+                            onInput={e => {
+                                // Fix: browser native "X" button fires input but not change
+                                if (e.target.value === '' && localSearch !== '') {
+                                    setLocalSearch('');
+                                    const params = new URLSearchParams(searchParams);
+                                    params.delete('search');
+                                    setSearchParams(params);
+                                }
+                            }}
                             id="shop-search-input"
                         />
                         <button type="submit" className="btn btn-primary btn-sm">Search</button>
@@ -255,6 +264,12 @@ export default function Shop() {
                                         params.delete('search');
                                         setSearchParams(params);
                                     }}>✕</button>
+                                </span>
+                            )}
+                            {(minPrice || maxPrice) && (
+                                <span className="filter-tag">
+                                    💰 {minPrice ? `₹${minPrice}` : '0'} — {maxPrice ? `₹${maxPrice}` : '∞'}
+                                    <button onClick={clearPriceFilter}>✕</button>
                                 </span>
                             )}
                         </div>

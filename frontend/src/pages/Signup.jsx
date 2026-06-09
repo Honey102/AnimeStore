@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ToastContext } from '../App';
 import './Auth.css';
@@ -16,6 +16,8 @@ function getStrength(password) {
 
 function getStrengthLabel(password) {
     const s = getStrength(password);
+    // ✅ Fix: score=0 was returning undefined, now returns 'weak'
+    if (s <= 0) return 'weak';
     return ['weak', 'fair', 'good', 'strong'][s - 1] || 'weak';
 }
 
@@ -23,6 +25,9 @@ export default function Signup() {
     const { register, user, loading: authLoading } = useAuth();
     const { addToast } = useContext(ToastContext);
     const navigate = useNavigate();
+    const location = useLocation();
+    // ✅ Fix: after signup, go back to where user came from (e.g. checkout)
+    const from = location.state?.from || '/profile';
 
     const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
     const [loading, setLoading] = useState(false);
@@ -31,9 +36,9 @@ export default function Signup() {
 
     useEffect(() => {
         if (user && !authLoading) {
-            navigate('/profile', { replace: true });
+            navigate(from, { replace: true });
         }
-    }, [user, authLoading, navigate]);
+    }, [user, authLoading, navigate, from]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -50,7 +55,7 @@ export default function Signup() {
         try {
             const data = await register(form.name, form.email, form.password);
             addToast(data.message, 'success');
-            navigate('/profile');
+            navigate(from, { replace: true }); // ✅ Fix: redirect to original destination
         } catch (err) {
             setError(err.response?.data?.message || 'Registration failed. Try again.');
         } finally {

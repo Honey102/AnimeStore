@@ -7,6 +7,8 @@ const cartReducer = (state, action) => {
         case 'ADD_ITEM': {
             const existing = state.items.find(i => i.id === action.payload.id);
             const maxStock = action.payload.stock ?? Infinity;
+            // ✅ Fix: out-of-stock items should never be added
+            if (maxStock <= 0) return state;
             if (existing) {
                 // Don't exceed product stock
                 if (existing.quantity >= maxStock) return state;

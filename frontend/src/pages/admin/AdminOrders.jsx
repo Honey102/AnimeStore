@@ -159,7 +159,7 @@ export default function AdminOrders() {
                                 <div><div className="order-detail-label">Name</div><div className="order-detail-value">{selected.customer?.name || 'Guest'}</div></div>
                                 <div><div className="order-detail-label">Email</div><div className="order-detail-value">{selected.customer?.email || selected.customerEmail || '—'}</div></div>
                                 <div><div className="order-detail-label">Phone</div><div className="order-detail-value">{selected.customer?.phone || '—'}</div></div>
-                                <div><div className="order-detail-label">Payment</div><div className="order-detail-value">{selected.customer?.payment || '—'}</div></div>
+                                <div><div className="order-detail-label">Payment</div><div className="order-detail-value">{selected.customer?.paymentMethod || selected.customer?.payment || '—'}</div></div>
                                 <div className="order-detail-grid" style={{ gridColumn: '1/-1', gridTemplateColumns: '1fr' }}>
                                     <div><div className="order-detail-label">Address</div>
                                     <div className="order-detail-value">{selected.customer?.address ? `${selected.customer.address}, ${selected.customer.city} ${selected.customer.pincode}` : '—'}</div></div>

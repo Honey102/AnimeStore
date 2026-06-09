@@ -160,11 +160,13 @@ router.get('/wishlist', authMiddleware, async (req, res) => {
 
 // POST /api/auth/orders — save order to user profile
 router.post('/orders', authMiddleware, async (req, res) => {
-    const { items, total, customer } = req.body;
+    const { items, customer } = req.body;
     try {
         const orderId = `ORD-${Date.now()}`;
-        const shipping = items.reduce((sum, i) => sum + (i.price * i.quantity), 0) > 999 ? 0 : 99;
-        const serverTotal = items.reduce((sum, i) => sum + (i.price * i.quantity), 0) + shipping;
+        // ✅ Security fix: always recalculate total server-side, never trust client total
+        const subtotal = items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+        const shipping = subtotal > 999 ? 0 : 99;
+        const serverTotal = subtotal + shipping;
 
         const result = await pool.query(
             `INSERT INTO orders (id, user_id, items, customer, total, status, source)
