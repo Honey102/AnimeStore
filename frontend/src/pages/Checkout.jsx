@@ -20,7 +20,8 @@ export default function Checkout() {
     const shipping = subtotal > 999 ? 0 : 99;
     const total = subtotal + shipping;
 
-    // ✅ Fix: Agar cart empty hai aur user /checkout pe directly aaya — shop pe bhejo
+    // ✅ Fix: Cart empty hone pe /shop pe redirect — useEffect se
+    // success = true hone par redirect block karo (order placed ho chuka hai)
     useEffect(() => {
         if (!success && items.length === 0) {
             navigate('/shop', { replace: true });
@@ -120,9 +121,20 @@ export default function Checkout() {
         );
     }
 
-    // ✅ Fix: Empty cart pe checkout ka static fallback — useEffect se redirect hoga
-    // Yeh sirf tab dikhega jab briefly items.length check ho raha ho
-    if (!items.length) return null;
+    // ✅ Cart empty hai — redirect screen dikhao (blank flash se bachne ke liye)
+    // useEffect already /shop pe navigate kar raha hai
+    if (!items.length && !success) {
+        return (
+            <div style={{
+                display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center',
+                minHeight: '60vh', gap: '1rem', color: 'var(--text-muted)'
+            }}>
+                <div className="spinner" />
+                <p style={{ fontSize: '0.9rem' }}>Cart is empty — redirecting to shop...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="checkout-page">
