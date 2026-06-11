@@ -353,3 +353,61 @@
         justify-content: center;
     }
 }
+
+/* ── Tab fade transition ── */
+.tab-visible {
+    animation: tabFadeIn 0.18s ease forwards;
+}
+.tab-fading {
+    opacity: 0;
+    transform: translateY(4px);
+    pointer-events: none;
+}
+
+@keyframes tabFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0);   }
+}
+
+/* ── Tab-level loading dot (inside tab button) ── */
+.tab-loader {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-red);
+    margin-left: 6px;
+    vertical-align: middle;
+    animation: tabPulse 0.9s ease-in-out infinite;
+}
+
+@keyframes tabPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.4; transform: scale(0.6); }
+}
+
+/* ── Skeleton shimmer ── */
+.skel {
+    background: linear-gradient(
+        90deg,
+        var(--bg-card) 25%,
+        rgba(255,255,255,0.06) 50%,
+        var(--bg-card) 75%
+    );
+    background-size: 200% 100%;
+    border-radius: 6px;
+    animation: shimmer 1.4s infinite;
+}
+
+.skel--line {
+    border-radius: 4px;
+}
+
+@keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton-card {
+    pointer-events: none;
+}

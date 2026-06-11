@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useCart } from '../context/CartContext';
@@ -19,6 +19,14 @@ export default function Checkout() {
 
     const shipping = subtotal > 999 ? 0 : 99;
     const total = subtotal + shipping;
+
+    // ✅ Fix: Agar cart empty hai aur user /checkout pe directly aaya — shop pe bhejo
+    useEffect(() => {
+        if (!success && items.length === 0) {
+            navigate('/shop', { replace: true });
+        }
+    }, [items.length, success, navigate]);
+
 
     const [form, setForm] = useState({
         name: user?.name || '', email: user?.email || '', phone: '',
@@ -50,33 +58,35 @@ export default function Checkout() {
         try {
             let res;
             if (user) {
-                // Logged-in users: save only to their profile (avoids duplicates)
                 res = await axios.post('/api/auth/orders', { items, customer: form, total });
             } else {
-                // Guest users: save to generic orders log
                 res = await axios.post('/api/orders', { items, customer: form, total });
             }
-            setOrderId(res.data.order.id);
-            setSuccess(true);
+            const id = res.data.order.id;
             clearCart();
             addToast('Order placed successfully! 🎌', 'success');
+
+            // ✅ Fix: Replace /checkout in browser history so Back button skips it
+            // User can never accidentally go back to checkout after placing order
+            window.history.replaceState(null, '', '/');
+            setOrderId(id);
+            setSuccess(true);
         } catch {
-            // Offline fallback: save order locally so data isn't lost
+            // Offline fallback
             const fallbackOrder = {
                 id: `ORD-${Date.now()}`,
-                items,
-                total,
-                customer: form,
+                items, total, customer: form,
                 status: 'pending',
                 createdAt: new Date().toISOString()
             };
             try {
                 const existing = JSON.parse(localStorage.getItem('animestore_offline_orders') || '[]');
                 localStorage.setItem('animestore_offline_orders', JSON.stringify([fallbackOrder, ...existing]));
-                setOrderId(fallbackOrder.id);
-                setSuccess(true);
                 clearCart();
                 addToast('Order saved locally! (Server offline) 📦', 'info');
+                window.history.replaceState(null, '', '/');
+                setOrderId(fallbackOrder.id);
+                setSuccess(true);
             } catch {
                 addToast('Something went wrong. Please try again!', 'error');
             }
@@ -94,26 +104,25 @@ export default function Checkout() {
                     <p className="success-order-id">Order ID: <strong>{orderId}</strong></p>
                     <p>Your anime goodies are on their way! 🚀<br />You'll receive a confirmation shortly.</p>
                     <div className="success-actions">
-                        <Link to="/shop" className="btn btn-primary btn-lg">Continue Shopping</Link>
-                        <Link to="/profile" state={{ tab: 'orders' }} className="btn btn-secondary">📦 View My Orders</Link>
-                        <Link to="/" className="btn btn-secondary">Go to Home</Link>
+                        {/* ✅ Fix: Use navigate with replace so back button goes to home, not checkout */}
+                        <button className="btn btn-primary btn-lg" onClick={() => navigate('/shop', { replace: true })}>
+                            Continue Shopping
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => navigate('/profile', { replace: true, state: { tab: 'orders' } })}>
+                            📦 View My Orders
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => navigate('/', { replace: true })}>
+                            Go to Home
+                        </button>
                     </div>
                 </div>
             </div>
         );
     }
 
-    if (!items.length) {
-        return (
-            <div className="checkout-empty">
-                <div style={{ padding: '5rem 2rem', textAlign: 'center' }}>
-                    <div style={{ fontSize: '4rem' }}>🛒</div>
-                    <h2>Your cart is empty</h2>
-                    <Link to="/shop" className="btn btn-primary" style={{ marginTop: '1rem' }}>Browse Products</Link>
-                </div>
-            </div>
-        );
-    }
+    // ✅ Fix: Empty cart pe checkout ka static fallback — useEffect se redirect hoga
+    // Yeh sirf tab dikhega jab briefly items.length check ho raha ho
+    if (!items.length) return null;
 
     return (
         <div className="checkout-page">

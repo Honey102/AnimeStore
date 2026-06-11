@@ -12,54 +12,120 @@ function formatDate(d) {
 }
 
 const TABS = [
-    { id: 'overview', label: '👤 Overview', },
-    { id: 'orders', label: '📦 Orders' },
+    { id: 'overview', label: '👤 Overview' },
+    { id: 'orders',   label: '📦 Orders'   },
     { id: 'wishlist', label: '❤️ Wishlist' },
     { id: 'settings', label: '⚙️ Settings' },
 ];
 
+/* ── Skeleton Loaders ── */
+function OrderSkeleton() {
+    return (
+        <div className="order-card skeleton-card">
+            <div className="order-card__header">
+                <div>
+                    <div className="skel skel--line" style={{ width: '140px', height: '14px', marginBottom: '6px' }} />
+                    <div className="skel skel--line" style={{ width: '80px', height: '11px' }} />
+                </div>
+                <div className="skel skel--line" style={{ width: '70px', height: '20px', borderRadius: '20px' }} />
+            </div>
+            <div className="order-items-list">
+                {[1, 2].map(i => (
+                    <div key={i} className="order-item-row">
+                        <div className="skel skel--line" style={{ flex: 1, height: '12px' }} />
+                        <div className="skel skel--line" style={{ width: '30px', height: '12px' }} />
+                        <div className="skel skel--line" style={{ width: '60px', height: '12px' }} />
+                    </div>
+                ))}
+            </div>
+            <div className="order-card__footer" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div className="skel skel--line" style={{ width: '100px', height: '14px' }} />
+                <div className="skel skel--line" style={{ width: '60px', height: '14px' }} />
+            </div>
+        </div>
+    );
+}
+
+function WishlistSkeleton() {
+    return (
+        <div className="products-grid">
+            {[1, 2, 3, 4].map(i => (
+                <div key={i} className="product-card skeleton-card">
+                    <div className="skel" style={{ height: '200px', borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0' }} />
+                    <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <div className="skel skel--line" style={{ height: '14px', width: '80%' }} />
+                        <div className="skel skel--line" style={{ height: '12px', width: '60%' }} />
+                        <div className="skel skel--line" style={{ height: '20px', width: '40%', marginTop: '0.5rem' }} />
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+}
+
 export default function Profile() {
-    const { user, loading, logout, updateProfile, isWishlisted } = useAuth();
+    const { user, loading, logout, updateProfile } = useAuth();
     const { addToast } = useContext(ToastContext);
     const navigate = useNavigate();
     const location = useLocation();
 
-    const [activeTab, setActiveTab] = useState(location.state?.tab || 'overview');
-    const [orders, setOrders] = useState([]);
-    const [wishlistProducts, setWishlistProducts] = useState([]);
-    const [loadingData, setLoadingData] = useState(false);
+    const [activeTab, setActiveTab]   = useState(location.state?.tab || 'overview');
+    const [tabFading, setTabFading]   = useState(false);
 
-    // Settings form state
+    // ✅ Separate loading state per tab — no shared spinner
+    const [orders, setOrders]                   = useState([]);
+    const [ordersLoading, setOrdersLoading]     = useState(false);
+    const [ordersLoaded, setOrdersLoaded]       = useState(false);
+
+    const [wishlistProducts, setWishlistProducts]   = useState([]);
+    const [wishlistLoading, setWishlistLoading]     = useState(false);
+    const [wishlistLoaded, setWishlistLoaded]       = useState(false);
+
+    // Settings
     const [editForm, setEditForm] = useState({ name: user?.name || '', favoriteAnime: user?.favoriteAnime || '' });
-    const [saving, setSaving] = useState(false);
+    const [saving, setSaving]     = useState(false);
 
-    // Password change state
-    const [pwForm, setPwForm] = useState({ current: '', newPw: '', confirm: '' });
+    // Password
+    const [pwForm, setPwForm]   = useState({ current: '', newPw: '', confirm: '' });
     const [pwSaving, setPwSaving] = useState(false);
-    const [pwError, setPwError] = useState('');
+    const [pwError, setPwError]   = useState('');
 
     useEffect(() => {
         if (!loading && !user) { navigate('/login', { state: { from: '/profile' } }); return; }
         if (user) setEditForm({ name: user.name, favoriteAnime: user.favoriteAnime || '' });
     }, [user, loading, navigate]);
 
+    // ✅ Load orders ONCE — cached after first load
     useEffect(() => {
-        if (activeTab === 'orders' && user) {
-            setLoadingData(true);
-            // ✅ Correct endpoint — returns full order objects with items, total, status
+        if (activeTab === 'orders' && user && !ordersLoaded) {
+            setOrdersLoading(true);
             axios.get('/api/auth/orders')
-                .then(r => setOrders(r.data.orders || []))
-                .catch(() => addToast('Could not load orders. Check connection.', 'error'))
-                .finally(() => setLoadingData(false));
+                .then(r => { setOrders(r.data.orders || []); setOrdersLoaded(true); })
+                .catch(() => addToast('Could not load orders.', 'error'))
+                .finally(() => setOrdersLoading(false));
         }
-        if (activeTab === 'wishlist' && user) {
-            setLoadingData(true);
+    }, [activeTab, user]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // ✅ Load wishlist ONCE — cached after first load
+    useEffect(() => {
+        if (activeTab === 'wishlist' && user && !wishlistLoaded) {
+            setWishlistLoading(true);
             axios.get('/api/auth/wishlist')
-                .then(r => setWishlistProducts(r.data.products || []))
-                .catch(() => addToast('Could not load wishlist. Check connection.', 'error'))
-                .finally(() => setLoadingData(false));
+                .then(r => { setWishlistProducts(r.data.products || []); setWishlistLoaded(true); })
+                .catch(() => addToast('Could not load wishlist.', 'error'))
+                .finally(() => setWishlistLoading(false));
         }
-    }, [activeTab, user, addToast]);
+    }, [activeTab, user]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // ✅ Smooth 150ms fade between tabs
+    const handleTabSwitch = (tabId) => {
+        if (tabId === activeTab) return;
+        setTabFading(true);
+        setTimeout(() => {
+            setActiveTab(tabId);
+            setTabFading(false);
+        }, 150);
+    };
 
     const handleSaveProfile = async (e) => {
         e.preventDefault();
@@ -83,7 +149,7 @@ export default function Profile() {
     const handlePasswordChange = async (e) => {
         e.preventDefault();
         setPwError('');
-        if (pwForm.newPw.length < 6) { setPwError('New password must be at least 6 characters'); return; }
+        if (pwForm.newPw.length < 6)       { setPwError('New password must be at least 6 characters'); return; }
         if (pwForm.newPw !== pwForm.confirm) { setPwError('Passwords do not match!'); return; }
         setPwSaving(true);
         try {
@@ -109,14 +175,14 @@ export default function Profile() {
             </div>
         );
     }
-    
+
     if (!user) return null;
 
     const avatarUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(user.name)}&backgroundColor=b6e3f4`;
 
     return (
         <div className="profile-page">
-            {/* Profile Hero */}
+            {/* Hero */}
             <div className="profile-hero">
                 <div className="profile-hero__bg" />
                 <div className="container profile-hero__inner">
@@ -144,17 +210,20 @@ export default function Profile() {
                         <button
                             key={tab.id}
                             className={`profile-tab ${activeTab === tab.id ? 'active' : ''}`}
-                            onClick={() => setActiveTab(tab.id)}
+                            onClick={() => handleTabSwitch(tab.id)}
                             id={`profile-tab-${tab.id}`}
                         >
                             {tab.label}
+                            {/* ✅ Tiny spinner inside tab button — not full-page */}
+                            {tab.id === 'orders'   && ordersLoading   && <span className="tab-loader" />}
+                            {tab.id === 'wishlist' && wishlistLoading && <span className="tab-loader" />}
                         </button>
                     ))}
                 </div>
             </div>
 
-            {/* Tab Content */}
-            <div className="container profile-content">
+            {/* Content — fades on tab switch */}
+            <div className={`container profile-content ${tabFading ? 'tab-fading' : 'tab-visible'}`}>
 
                 {/* ── Overview ── */}
                 {activeTab === 'overview' && (
@@ -163,7 +232,7 @@ export default function Profile() {
                             {[
                                 { label: 'Orders Placed', value: user.orders?.length || 0, icon: '📦' },
                                 { label: 'Wishlist Items', value: user.wishlist?.length || 0, icon: '❤️' },
-                                { label: 'Member Level', value: 'Anime Fan', icon: '⭐' },
+                                { label: 'Member Level',  value: 'Anime Fan',               icon: '⭐' },
                             ].map(s => (
                                 <div key={s.label} className="overview-stat">
                                     <span className="overview-stat__icon">{s.icon}</span>
@@ -174,8 +243,8 @@ export default function Profile() {
                         </div>
                         <div className="overview-cta">
                             <Link to="/shop" className="btn btn-primary">🛒 Continue Shopping</Link>
-                            <button className="btn btn-secondary" onClick={() => setActiveTab('wishlist')}>❤️ View Wishlist</button>
-                            <button className="btn btn-secondary" onClick={() => setActiveTab('orders')}>📦 View Orders</button>
+                            <button className="btn btn-secondary" onClick={() => handleTabSwitch('wishlist')}>❤️ View Wishlist</button>
+                            <button className="btn btn-secondary" onClick={() => handleTabSwitch('orders')}>📦 View Orders</button>
                         </div>
                     </div>
                 )}
@@ -184,8 +253,10 @@ export default function Profile() {
                 {activeTab === 'orders' && (
                     <div className="profile-orders">
                         <h2 className="profile-section-title">Your Orders</h2>
-                        {loadingData ? (
-                            <div className="spinner-wrapper"><div className="spinner" /></div>
+                        {ordersLoading ? (
+                            <div className="orders-list">
+                                {[1, 2, 3].map(i => <OrderSkeleton key={i} />)}
+                            </div>
                         ) : orders.length === 0 ? (
                             <div className="profile-empty">
                                 <div style={{ fontSize: '4rem' }}>📦</div>
@@ -196,7 +267,6 @@ export default function Profile() {
                         ) : (
                             <div className="orders-list">
                                 {orders.map(order => {
-                                    // ✅ DB returns snake_case — support both
                                     const createdAt = order.created_at || order.createdAt;
                                     const items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []);
                                     const statusColors = {
@@ -207,31 +277,31 @@ export default function Profile() {
                                     };
                                     const dotColor = statusColors[order.status] || '#6b7280';
                                     return (
-                                    <div key={order.id} className="order-card">
-                                        <div className="order-card__header">
-                                            <div>
-                                                <span className="order-id">{order.id}</span>
-                                                <span className="order-date">{createdAt ? formatDate(createdAt) : '—'}</span>
-                                            </div>
-                                            <div className="order-status">
-                                                <span className="status-dot" style={{ background: dotColor, boxShadow: `0 0 6px ${dotColor}` }} />
-                                                <span style={{ color: dotColor, fontWeight: 600, textTransform: 'capitalize' }}>{order.status}</span>
-                                            </div>
-                                        </div>
-                                        <div className="order-items-list">
-                                            {items.map((item, i) => (
-                                                <div key={i} className="order-item-row">
-                                                    <span className="order-item-name">{item.name}</span>
-                                                    <span className="order-item-qty">×{item.quantity}</span>
-                                                    <span className="order-item-price">{formatPrice(item.price * item.quantity)}</span>
+                                        <div key={order.id} className="order-card">
+                                            <div className="order-card__header">
+                                                <div>
+                                                    <span className="order-id">{order.id}</span>
+                                                    <span className="order-date">{createdAt ? formatDate(createdAt) : '—'}</span>
                                                 </div>
-                                            ))}
+                                                <div className="order-status">
+                                                    <span className="status-dot" style={{ background: dotColor, boxShadow: `0 0 6px ${dotColor}` }} />
+                                                    <span style={{ color: dotColor, fontWeight: 600, textTransform: 'capitalize' }}>{order.status}</span>
+                                                </div>
+                                            </div>
+                                            <div className="order-items-list">
+                                                {items.map((item, i) => (
+                                                    <div key={i} className="order-item-row">
+                                                        <span className="order-item-name">{item.name}</span>
+                                                        <span className="order-item-qty">×{item.quantity}</span>
+                                                        <span className="order-item-price">{formatPrice(item.price * item.quantity)}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="order-card__footer">
+                                                <span>Total: <strong style={{ color: 'var(--accent-gold)' }}>{formatPrice(order.total)}</strong></span>
+                                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{items.length} item{items.length !== 1 ? 's' : ''}</span>
+                                            </div>
                                         </div>
-                                        <div className="order-card__footer">
-                                            <span>Total: <strong style={{ color: 'var(--accent-gold)' }}>{formatPrice(order.total)}</strong></span>
-                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{items.length} item{items.length !== 1 ? 's' : ''}</span>
-                                        </div>
-                                    </div>
                                     );
                                 })}
                             </div>
@@ -243,8 +313,8 @@ export default function Profile() {
                 {activeTab === 'wishlist' && (
                     <div className="profile-wishlist">
                         <h2 className="profile-section-title">Your Wishlist ❤️</h2>
-                        {loadingData ? (
-                            <div className="spinner-wrapper"><div className="spinner" /></div>
+                        {wishlistLoading ? (
+                            <WishlistSkeleton />
                         ) : wishlistProducts.length === 0 ? (
                             <div className="profile-empty">
                                 <div style={{ fontSize: '4rem' }}>❤️</div>
@@ -269,8 +339,7 @@ export default function Profile() {
                                 <div className="form-group">
                                     <label htmlFor="settings-name">Display Name</label>
                                     <input
-                                        id="settings-name"
-                                        type="text"
+                                        id="settings-name" type="text"
                                         value={editForm.name}
                                         onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
                                         required
@@ -283,8 +352,7 @@ export default function Profile() {
                                 <div className="form-group">
                                     <label htmlFor="settings-anime">Favorite Anime</label>
                                     <input
-                                        id="settings-anime"
-                                        type="text"
+                                        id="settings-anime" type="text"
                                         placeholder="e.g. Naruto, One Piece..."
                                         value={editForm.favoriteAnime}
                                         onChange={e => setEditForm(f => ({ ...f, favoriteAnime: e.target.value }))}
@@ -296,42 +364,23 @@ export default function Profile() {
                             </form>
                         </div>
 
-                        {/* Danger zone */}
                         <div className="settings-danger">
                             <h3>Change Password 🔒</h3>
                             <form onSubmit={handlePasswordChange} className="settings-form" style={{ marginBottom: '1.5rem' }}>
                                 <div className="form-group">
                                     <label htmlFor="pw-current">Current Password</label>
-                                    <input
-                                        id="pw-current"
-                                        type="password"
-                                        placeholder="Enter current password"
-                                        value={pwForm.current}
-                                        onChange={e => setPwForm(f => ({ ...f, current: e.target.value }))}
-                                        required
-                                    />
+                                    <input id="pw-current" type="password" placeholder="Enter current password"
+                                        value={pwForm.current} onChange={e => setPwForm(f => ({ ...f, current: e.target.value }))} required />
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="pw-new">New Password</label>
-                                    <input
-                                        id="pw-new"
-                                        type="password"
-                                        placeholder="Min. 6 characters"
-                                        value={pwForm.newPw}
-                                        onChange={e => setPwForm(f => ({ ...f, newPw: e.target.value }))}
-                                        required
-                                    />
+                                    <input id="pw-new" type="password" placeholder="Min. 6 characters"
+                                        value={pwForm.newPw} onChange={e => setPwForm(f => ({ ...f, newPw: e.target.value }))} required />
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="pw-confirm">Confirm New Password</label>
-                                    <input
-                                        id="pw-confirm"
-                                        type="password"
-                                        placeholder="Repeat new password"
-                                        value={pwForm.confirm}
-                                        onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))}
-                                        required
-                                    />
+                                    <input id="pw-confirm" type="password" placeholder="Repeat new password"
+                                        value={pwForm.confirm} onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))} required />
                                 </div>
                                 {pwError && (
                                     <div style={{ color: 'var(--accent-red)', fontSize: '0.85rem', padding: '0.5rem 0.75rem', background: 'rgba(230,57,70,0.08)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(230,57,70,0.2)' }}>
@@ -342,7 +391,6 @@ export default function Profile() {
                                     {pwSaving ? 'Changing...' : '🔒 Change Password'}
                                 </button>
                             </form>
-
                             <h3>Account Actions</h3>
                             <button className="btn btn-secondary" onClick={handleLogout} id="settings-logout-btn">
                                 🚪 Logout of Account
